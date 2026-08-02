@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", serif;
+  --font-mono: "DM Mono", monospace;
+  
+  /* Цвета ч/б */
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-fg-muted: #666666;
+  --color-border: #e5e5e5;
+}
+
+/* Твой кастомный контейнер */
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+  width: 100%;
+  
+  @media (width >= 640px) { max-width: 640px; }
+  @media (width >= 768px) { max-width: 768px; }
+  @media (width >= 1024px) { max-width: 1024px; }
+  @media (width >= 1280px) { max-width: 1280px; }
+  @media (width >= 1536px) { max-width: 1536px; }
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-bg)] text-[var(--color-fg)] antialiased;
+  }
+}
