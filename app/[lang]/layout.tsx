@@ -1,6 +1,6 @@
 import { Cormorant_Garamond, DM_Mono } from 'next/font/google'
 import { LangProvider } from '@/lib/i18n-context'
-import { Toaster } from 'react-hot-toast' // Используем стандартный Toaster
+import { Toaster } from 'sonner'
 
 const displayFont = Cormorant_Garamond({
 	subsets: ['latin', 'cyrillic'],
@@ -35,7 +35,7 @@ export default async function LocaleLayout({
 		>
 			<body className='bg-white text-black antialiased font-mono'>
 				<LangProvider lang={lang}>
-					<Toaster position='bottom-right' />
+					<Toaster position='bottom-right' richColors />
 					{children}
 				</LangProvider>
 			</body>

@@ -6,6 +6,7 @@ import { ShowReel } from '@/components/sections/ShowReel'
 import { PhotoGallery } from '@/components/sections/PhotoGallery'
 import { About } from '@/components/sections/About'
 import { Contacts } from '@/components/sections/Contacts'
+import { Filmography } from '@/components/sections/Filmography'
 
 export default async function HomePage({
 	params,
@@ -21,6 +22,7 @@ export default async function HomePage({
 			<Hero lang={lang} />
 			<ShowReel locale={lang} />
 			<PhotoGallery locale={lang} />
+			<Filmography locale={lang} />
 			<About locale={lang} />
 			<Contacts locale={lang} />
 			{/* Остальные секции будут тут */}

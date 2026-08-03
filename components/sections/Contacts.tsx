@@ -1,23 +1,24 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
+import { toast } from 'sonner'
 import {
 	FaInstagram,
 	FaTelegramPlane,
 	FaWhatsapp,
+	FaWeixin,
 	FaComment,
-	FaCopy,
-	FaCheck,
 } from 'react-icons/fa'
+import { ContactForm } from './ContactForm'
 
 type ContactsProps = {
 	locale?: string
 }
 
-export const Contacts = ({ locale }: ContactsProps) => {
-	const [copied, setCopied] = useState(false)
-	const email = 'ardager121@mail.ru'
+// TODO: замени на реальный WeChat ID
+const WECHAT_ID = 'hama_arkayev'
 
+export const Contacts = ({ locale }: ContactsProps) => {
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
 	const isKk = locale === 'kk' || locale === 'kz'
@@ -37,35 +38,38 @@ export const Contacts = ({ locale }: ContactsProps) => {
 				: isKk
 					? 'Тікелей хабарласу'
 					: '직접 연락하기',
-		copyHint: isRu ? 'Копировать' : isEn ? 'Copy' : isKk ? 'Көшіру' : '복사',
-		copiedLabel: isRu
-			? 'Скопировано!'
+		wechatIdCopied: isRu
+			? 'WeChat ID скопирован'
 			: isEn
-				? 'Copied!'
+				? 'WeChat ID copied'
 				: isKk
-					? 'Көшірілді!'
-					: '복사됨!',
-		official: isRu
-			? 'Официальный Email'
+					? 'WeChat ID көшірілді'
+					: 'WeChat ID가 복사되었습니다',
+		wechatCopyFailed: isRu
+			? 'Не удалось скопировать'
 			: isEn
-				? 'Official Email'
+				? 'Could not copy'
 				: isKk
-					? 'Ресми Email'
-					: '공식 이메일',
-		footerCopy: 'hama-actor.com // 2026',
+					? 'Көшіру мүмкін болмады'
+					: '복사하지 못했습니다',
 	}
 
-	const handleCopy = async () => {
+	const handleWeChatClick = async () => {
 		try {
-			await navigator.clipboard.writeText(email)
-			setCopied(true)
-			setTimeout(() => setCopied(false), 2000)
+			await navigator.clipboard.writeText(WECHAT_ID)
+			toast.success(`${t.wechatIdCopied}: ${WECHAT_ID}`)
 		} catch (err) {
-			console.error('Failed to copy!', err)
+			console.error('Failed to copy WeChat ID', err)
+			toast.error(t.wechatCopyFailed)
 		}
 	}
 
-	const links = [
+	const links: {
+		name: string
+		icon: React.ReactNode
+		href?: string
+		onClick?: () => void
+	}[] = [
 		{
 			name: 'WhatsApp',
 			icon: <FaWhatsapp size={24} />,
@@ -81,7 +85,16 @@ export const Contacts = ({ locale }: ContactsProps) => {
 			icon: <FaInstagram size={24} />,
 			href: 'https://instagram.com/hama_gamma',
 		},
-		{ name: 'KakaoTalk', icon: <FaComment size={24} />, href: '#' },
+		{
+			name: 'KakaoTalk',
+			icon: <FaComment size={24} />,
+			href: '#', // TODO: заменить на реальную ссылку/open.kakao.com/... когда будет
+		},
+		{
+			name: 'WeChat',
+			icon: <FaWeixin size={24} />,
+			onClick: handleWeChatClick,
+		},
 	]
 
 	return (
@@ -99,58 +112,43 @@ export const Contacts = ({ locale }: ContactsProps) => {
 					{t.heading}
 				</h2>
 
-				{/* Блок с Email и Копированием */}
-				<div className='mb-8'>
-					<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 mb-3 block'>
-						{t.official}
-					</span>
-					<div className='inline-flex items-center gap-4 bg-neutral-50 px-6 py-4 rounded-sm border border-neutral-100 group transition-all hover:border-[#d90416] relative'>
-						<a
-							href={`mailto:${email}`}
-							className='font-display text-2xl md:text-3xl font-bold lowercase tracking-tighter text-black'
-						>
-							{email}
-						</a>
-
-						<button
-							onClick={handleCopy}
-							className='flex items-center justify-center p-2 text-neutral-400 hover:text-[#d90416] transition-colors cursor-pointer border-l border-neutral-200 pl-4'
-							title={t.copyHint}
-						>
-							{copied ? (
-								<FaCheck className='text-green-500' size={18} />
-							) : (
-								<FaCopy size={18} />
-							)}
-						</button>
-
-						{/* Всплывающая подсказка "Copied" */}
-						{copied && (
-							<span className='absolute -top-8 left-1/2 -translate-x-1/2 font-mono text-[10px] bg-black text-white px-3 py-1 rounded uppercase tracking-widest animate-bounce'>
-								{t.copiedLabel}
-							</span>
-						)}
-					</div>
-				</div>
+				{/* Форма — вместо публичной почты */}
+				<ContactForm locale={locale} />
 
 				{/* Сетка мессенджеров */}
-				<div className='grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12'>
-					{links.map((link, i) => (
-						<a
-							key={i}
-							href={link.href}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='group flex flex-col items-center gap-4 transition-all'
-						>
-							<div className='w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-200 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'>
-								{link.icon}
-							</div>
-							<span className='font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'>
-								{link.name}
-							</span>
-						</a>
-					))}
+				<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-8 md:gap-12'>
+					{links.map((link, i) =>
+						link.href ? (
+							<a
+								key={i}
+								href={link.href}
+								target='_blank'
+								rel='noopener noreferrer'
+								className='group flex flex-col items-center gap-4 transition-all'
+							>
+								<div className='w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-200 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'>
+									{link.icon}
+								</div>
+								<span className='font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'>
+									{link.name}
+								</span>
+							</a>
+						) : (
+							<button
+								key={i}
+								type='button'
+								onClick={link.onClick}
+								className='group flex flex-col items-center gap-4 transition-all cursor-pointer'
+							>
+								<div className='w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-200 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'>
+									{link.icon}
+								</div>
+								<span className='font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'>
+									{link.name}
+								</span>
+							</button>
+						)
+					)}
 				</div>
 			</div>
 		</section>

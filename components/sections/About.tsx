@@ -46,7 +46,6 @@ export const About = ({ locale }: { locale?: string }) => {
 				ko: '무기 취급',
 			},
 			{ en: 'Cardistry', ru: 'Кардистри', kk: 'Кардистри', ko: '카디스트리' },
-			{ en: 'Coding', ru: 'Кодинг', kk: 'Кодтау', ko: '코딩' },
 			{
 				en: 'Skydiving',
 				ru: 'Парашют',
