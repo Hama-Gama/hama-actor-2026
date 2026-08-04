@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { MapPin, Clock } from 'lucide-react'
+import { ResumeDownload } from '../ui/ResumeDownload'
 
 interface HeroProps {
 	lang: string
@@ -189,6 +190,9 @@ export default function Hero({ lang }: HeroProps) {
 							))}
 						</div>
 					</div>
+
+					{/* Resume Download */}
+					<ResumeDownload locale={lang} />
 				</div>
 			</div>
 		</section>

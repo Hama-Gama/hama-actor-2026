@@ -17,6 +17,20 @@ export const About = ({ locale }: { locale?: string }) => {
 				: isKk
 					? 'Дағдылар'
 					: '기술',
+		sizesHeading: isRu
+			? 'Параметры'
+			: isEn
+				? 'Sizes & Measurements'
+				: isKk
+					? 'Дене өлшемдері'
+					: '치수 정보',
+		sizesNote: isRu
+			? 'Примерные значения — уточняются'
+			: isEn
+				? 'Approximate — to be confirmed'
+				: isKk
+					? 'Шамамен — нақтыланады'
+					: '대략적인 수치 — 추후 확정',
 		data: {
 			height: {
 				label: isRu ? 'Рост' : isEn ? 'Height' : isKk ? 'Бойы' : '키',
@@ -33,6 +47,80 @@ export const About = ({ locale }: { locale?: string }) => {
 			hair: {
 				label: isRu ? 'Волосы' : isEn ? 'Hair' : isKk ? 'Шаш түсі' : '머리카락',
 				val: isRu ? 'Темные' : isEn ? 'Dark' : isKk ? 'Қара' : '어두운색',
+			},
+		},
+		sizes: {
+			chest: {
+				label: isRu ? 'Грудь' : isEn ? 'Chest' : isKk ? 'Кеуде' : '가슴둘레',
+				val: '92 cm',
+			},
+			waist: {
+				label: isRu ? 'Талия' : isEn ? 'Waist' : isKk ? 'Бел' : '허리둘레',
+				val: '76 cm',
+			},
+			hips: {
+				label: isRu ? 'Бёдра' : isEn ? 'Hips' : isKk ? 'Жамбас' : '엉덩이둘레',
+				val: '94 cm',
+			},
+			neck: {
+				label: isRu ? 'Шея' : isEn ? 'Neck' : isKk ? 'Мойын' : '목둘레',
+				val: '38 cm',
+			},
+			sleeve: {
+				label: isRu ? 'Рукав' : isEn ? 'Sleeve' : isKk ? 'Жең' : '소매길이',
+				val: '63 cm',
+			},
+			inseam: {
+				label: isRu
+					? 'Шаг (inseam)'
+					: isEn
+						? 'Inseam'
+						: isKk
+							? 'Шалбар ұзындығы (inseam)'
+							: '인심 (다리안쪽길이)',
+				val: '82 cm',
+			},
+			jacket: {
+				label: isRu ? 'Пиджак' : isEn ? 'Jacket' : isKk ? 'Пиджак' : '재킷 사이즈',
+				val: 'EU 48 / US 38',
+			},
+			hat: {
+				label: isRu ? 'Головной убор' : isEn ? 'Hat' : isKk ? 'Бас киім' : '모자 사이즈',
+				val: '57 cm',
+			},
+			shoe: {
+				label: isRu ? 'Обувь' : isEn ? 'Shoe' : isKk ? 'Аяқ киім' : '신발 사이즈',
+				val: 'EU 43 / US 10 / UK 9 (275 mm)',
+			},
+			reach: {
+				label: isRu
+					? 'Размах рук (reach)'
+					: isEn
+						? 'Reach'
+						: isKk
+							? 'Қол ұзындығы (reach)'
+							: '리치 (팔길이)',
+				val: '183 cm',
+			},
+			hand: {
+				label: isRu
+					? 'Ведущая рука'
+					: isEn
+						? 'Dominant Hand'
+						: isKk
+							? 'Жетекші қол'
+							: '주로 사용하는 손',
+				val: isRu ? 'Правая' : isEn ? 'Right' : isKk ? 'Оң қол' : '오른손',
+			},
+			glove: {
+				label: isRu
+					? 'Перчатки'
+					: isEn
+						? 'Glove Size'
+						: isKk
+							? 'Қолғап өлшемі'
+							: '장갑 사이즈',
+				val: 'L',
 			},
 		},
 		skillList: [
@@ -111,6 +199,29 @@ export const About = ({ locale }: { locale?: string }) => {
 							</div>
 						))}
 					</div>
+				</div>
+			</div>
+
+			{/* Sizes & Measurements — full width, for wardrobe / stunt coordination */}
+			<div className='mt-8 border border-neutral-100 rounded-sm p-6 md:p-8'>
+				<div className='flex items-baseline justify-between mb-6 flex-wrap gap-2'>
+					<h3 className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 font-bold'>
+						// {t.sizesHeading}
+					</h3>
+					<span className='font-mono text-[9px] uppercase tracking-widest text-neutral-300'>
+						{t.sizesNote}
+					</span>
+				</div>
+
+				<div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-5'>
+					{Object.values(t.sizes).map((item, i) => (
+						<div key={i} className='flex flex-col gap-1'>
+							<span className='font-mono text-[9px] uppercase text-neutral-400 tracking-widest'>
+								{item.label}
+							</span>
+							<span className='font-sans font-bold text-sm'>{item.val}</span>
+						</div>
+					))}
 				</div>
 			</div>
 		</section>
