@@ -91,7 +91,7 @@ export default function Hero({ lang }: HeroProps) {
 				{/* Photo Side */}
 				<div className='flex-1 relative aspect-[3/4] w-full max-w-md bg-neutral-100 overflow-hidden rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.01]'>
 					<Image
-						src='/hero.jpg'
+						src='/hero2.jpg'
 						alt={content.name}
 						fill
 						priority
