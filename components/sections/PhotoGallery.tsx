@@ -72,7 +72,7 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 	return (
 		<section className='container mx-auto px-4 py-16' id='photos'>
 			{/* Заголовок с кастомными стрелками навигации */}
-			<div className='mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral-100 pb-8'>
+			<div className='mb-0 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral-100 pb-8'>
 				<div className='flex items-center gap-6'>
 					<div className='h-12 w-[3px] bg-[#d90416]' />
 					<h2 className='font-display text-4xl md:text-5xl font-bold uppercase italic tracking-tighter text-black'>

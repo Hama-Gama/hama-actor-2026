@@ -162,7 +162,7 @@ export default function Hero({ lang }: HeroProps) {
 						<div className='flex flex-wrap gap-6'>
 							{LANGUAGE_LEVELS.map(l => (
 								<div key={l.code} className='flex flex-col items-center gap-2'>
-									<div className='w-10 h-10 rounded-full bg-neutral-50 border border-neutral-200 overflow-hidden shadow-sm'>
+									<div className='w-5 h-5 rounded-full bg-neutral-50 border border-neutral-200 overflow-hidden shadow-sm'>
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
 											src={`https://flagcdn.com/w80/${l.countryCode}.png`}

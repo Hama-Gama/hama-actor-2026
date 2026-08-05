@@ -18,6 +18,14 @@ type ContactsProps = {
 // TODO: замени на реальный WeChat ID
 const WECHAT_ID = 'hama_arkayev'
 
+// Единый стиль иконки-кружка для всех контактов — меняешь один раз здесь,
+// применяется одинаково и к <a>, и к <button> (WeChat).
+const ICON_CIRCLE_CLASS =
+	'w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-600 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'
+
+const ICON_LABEL_CLASS =
+	'font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'
+
 export const Contacts = ({ locale }: ContactsProps) => {
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
@@ -126,12 +134,8 @@ export const Contacts = ({ locale }: ContactsProps) => {
 								rel='noopener noreferrer'
 								className='group flex flex-col items-center gap-4 transition-all'
 							>
-								<div className='w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-200 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'>
-									{link.icon}
-								</div>
-								<span className='font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'>
-									{link.name}
-								</span>
+								<div className={ICON_CIRCLE_CLASS}>{link.icon}</div>
+								<span className={ICON_LABEL_CLASS}>{link.name}</span>
 							</a>
 						) : (
 							<button
@@ -140,14 +144,10 @@ export const Contacts = ({ locale }: ContactsProps) => {
 								onClick={link.onClick}
 								className='group flex flex-col items-center gap-4 transition-all cursor-pointer'
 							>
-								<div className='w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full border border-neutral-200 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'>
-									{link.icon}
-								</div>
-								<span className='font-mono text-[10px] uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'>
-									{link.name}
-								</span>
+								<div className={ICON_CIRCLE_CLASS}>{link.icon}</div>
+								<span className={ICON_LABEL_CLASS}>{link.name}</span>
 							</button>
-						)
+						),
 					)}
 				</div>
 			</div>
