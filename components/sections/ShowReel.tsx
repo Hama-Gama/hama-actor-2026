@@ -189,7 +189,10 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 	)
 
 	return (
-		<section className='container mx-auto px-4 py-8' id='showreels'>
+		<section
+			className='container mx-auto px-4 py-8 scroll-mt-24'
+			id='showreels'
+		>
 			<div className='mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6'>
 				<div className='flex items-center gap-6'>
 					<div className='h-12 w-[3px] bg-[#d90416]' />

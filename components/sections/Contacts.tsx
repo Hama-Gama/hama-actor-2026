@@ -107,7 +107,7 @@ export const Contacts = ({ locale }: ContactsProps) => {
 
 	return (
 		<section
-			className='container mx-auto px-4 py-8 border-t border-neutral-100'
+			className='container mx-auto px-4 py-8 border-t border-neutral-100 scroll-mt-24'
 			id='contact'
 		>
 			<div className='text-center max-w-3xl mx-auto'>
