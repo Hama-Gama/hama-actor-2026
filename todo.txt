@@ -4,7 +4,6 @@ SHARING / SHARE UX
 -------------------
 [ ] Open Graph мета-теги (og:title, og:description, og:image, og:url, twitter:card)
     -> чтобы ссылка красиво разворачивалась при пересылке в Telegram/WhatsApp/почте
-[ ] Проверить кнопку Share -> Web Share API на мобильном (navigator.share)
 [ ] Кнопка "Save to Contacts" -> скачивание .vcf файла
 [ ] QR-код для оффлайн ситуаций (кастинги, встречи)
 [ ] Проверить title вкладки и favicon (не "Home | Next.js App")

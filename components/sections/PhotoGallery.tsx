@@ -101,6 +101,13 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 					spaceBetween={20}
 					slidesPerView={1}
 					grabCursor={true}
+					// observer/observeParents: Swiper сам пересчитывает раскладку при любом
+					// изменении размеров контейнера. Без этого начальный расчёт слайдов
+					// иногда происходит ДО того, как next/font подменит fallback-шрифт на
+					// настоящий (display:'swap'), из-за чего ширина контейнера меняется
+					// постфактум — и на долю секунды видно 1 слайд на всю ширину вместо 3.
+					observer={true}
+					observeParents={true}
 					mousewheel={{ forceToAxis: true }}
 					navigation={{
 						prevEl: '.swiper-button-prev-custom',

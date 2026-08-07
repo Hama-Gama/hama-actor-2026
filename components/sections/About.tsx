@@ -179,7 +179,8 @@ export const About = ({ locale }: { locale?: string }) => {
 			},
 		},
 		// icon — иконка навыка. videoUrl — прямая ссылка на mp4/webm (до 30 сек).
-		// Пусто = кнопка "смотреть" не показывается. Заполни, когда видео будут готовы.
+		// Пусто = кнопка "смотреть" не показывается.
+		// TODO: положи файлы с такими именами в public/videos/
 		skillList: [
 			{
 				en: 'Taekwondo',
@@ -187,7 +188,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Таэквондо',
 				ko: '태권도',
 				icon: Footprints,
-				videoUrl: '',
+				videoUrl: '/videos/taekwondo.mp4',
 			},
 			{
 				en: 'Boxing',
@@ -195,7 +196,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Бокс',
 				ko: '복싱',
 				icon: HandFist,
-				videoUrl: '',
+				videoUrl: '/videos/boxing.mp4',
 			},
 			{
 				en: 'MMA',
@@ -203,7 +204,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'ММА',
 				ko: 'MMA',
 				icon: Swords,
-				videoUrl: '',
+				videoUrl: '/videos/mma.mp4',
 			},
 			{
 				en: 'Weapon Handling',
@@ -211,7 +212,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Қару қолдану',
 				ko: '무기 취급',
 				icon: Target,
-				videoUrl: '',
+				videoUrl: '/videos/weapon-handling.mp4',
 			},
 			{
 				en: 'Cardistry',
@@ -219,7 +220,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Кардистри',
 				ko: '카디스트리',
 				icon: Spade,
-				videoUrl: '',
+				videoUrl: '/videos/cardistry.mp4',
 			},
 			{
 				en: 'Skydiving',
@@ -227,7 +228,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Парашютпен секіру',
 				ko: '스카이다이빙',
 				icon: WindArrowDown,
-				videoUrl: '',
+				videoUrl: '/videos/skydiving.mp4',
 			},
 			{
 				en: 'Motorcycling',
@@ -235,7 +236,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				kk: 'Мотоцикл айдау',
 				ko: '모터사이클',
 				icon: Motorbike,
-				videoUrl: '',
+				videoUrl: '/videos/motorcycling.mp4',
 			},
 		],
 	}
@@ -306,24 +307,43 @@ export const About = ({ locale }: { locale?: string }) => {
 					<h3 className='font-mono text-[10px] uppercase tracking-[0.3em] text-[#d90416] mb-2 font-bold'>
 						// {t.skillsHeading}
 					</h3>
-					<div className='grid grid-cols-2 gap-y-6 gap-x-4'>
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-3'>
 						{t.skillList.map((skill, i) => {
 							const Icon = skill.icon
-							return (
-								<div key={i} className='flex items-center gap-2.5'>
-									<Icon size={16} className='text-[#d90416] shrink-0' />
-									<span className='font-sans uppercase text-sm font-bold tracking-tight opacity-90'>
+							const content = (
+								<>
+									<Icon size={16} className='order-1 text-[#d90416] shrink-0' />
+									{skill.videoUrl && (
+										<span className='order-2 sm:order-3 flex items-center justify-center w-6 h-6 rounded-full bg-[#d90416] text-white shrink-0'>
+											<Play size={10} fill='currentColor' className='ml-0.5' />
+										</span>
+									)}
+									<span className='order-3 sm:order-2 font-sans uppercase text-sm font-bold tracking-tight opacity-90 flex-1 text-left'>
 										{skill[skillKey]}
 									</span>
-									{skill.videoUrl && (
-										<button
-											type='button'
-											onClick={() => setActiveVideo(skill.videoUrl)}
-											className='flex items-center justify-center w-5 h-5 rounded-full border border-white/30 text-white/70 hover:border-[#d90416] hover:text-[#d90416] transition-colors cursor-pointer shrink-0'
-										>
-											<Play size={9} fill='currentColor' />
-										</button>
-									)}
+								</>
+							)
+
+							// Если есть видео — вся строка кликабельна (удобнее попасть пальцем,
+							// чем в маленькую иконку). Рамка + отступы между карточками не дают
+							// случайно задеть соседний навык. Если видео нет — просто текст.
+							// На мобильном порядок: иконка навыка → play-кнопка → название.
+							// От sm и выше: иконка → название → play-кнопка (как было).
+							return skill.videoUrl ? (
+								<button
+									key={i}
+									type='button'
+									onClick={() => setActiveVideo(skill.videoUrl)}
+									className='flex items-center gap-2.5 py-2.5 px-3 rounded-sm border border-white/20 hover:border-[#d90416]/50 hover:bg-white/5 active:bg-white/10 transition-colors cursor-pointer text-left'
+								>
+									{content}
+								</button>
+							) : (
+								<div
+									className='flex items-center gap-2.5 py-2.5 px-3 rounded-sm border border-white/20'
+									key={i}
+								>
+									{content}
 								</div>
 							)
 						})}
