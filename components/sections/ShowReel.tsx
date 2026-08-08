@@ -14,12 +14,10 @@ const VIMEO_URL = 'https://player.vimeo.com/video/222087977?h=f80f6ce383'
 const DRIVE_URL =
 	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
 
-// Вынесено за пределы компонента — раньше пересоздавалось на каждый рендер,
-// из-за чего useMemo ниже фактически не работал
 const TRANSLATIONS = {
 	en: {
 		heading: 'Showreels',
-		drive: 'Raw Materials (Drive)',
+		drive: 'Raw Materials',
 		reels: {
 			main: { title: 'Main Showreel', category: 'General Portfolio' },
 			drama: { title: 'Drama Showreel', category: 'Acting / Dialogue' },
@@ -29,7 +27,7 @@ const TRANSLATIONS = {
 	},
 	ru: {
 		heading: 'Шоурилы',
-		drive: 'Исходники (Drive)',
+		drive: 'Исходные материалы',
 		reels: {
 			main: { title: 'Основной шоурил', category: 'Общее портфолио' },
 			drama: { title: 'Драматический шоурил', category: 'Актёрская игра' },
@@ -39,7 +37,7 @@ const TRANSLATIONS = {
 	},
 	kk: {
 		heading: 'Шоурилдер',
-		drive: 'Материалдар (Drive)',
+		drive: 'Бастапқы материалдар',
 		reels: {
 			main: { title: 'Негізгі шоурил', category: 'Жалпы портфолио' },
 			drama: { title: 'Драмалық шоурил', category: 'Актёрлік шеберлік' },
@@ -49,7 +47,7 @@ const TRANSLATIONS = {
 	},
 	ko: {
 		heading: '쇼릴',
-		drive: '자료 다운로드 (Drive)',
+		drive: '원본 자료',
 		reels: {
 			main: { title: '메인 쇼릴', category: '전체 포트폴리오' },
 			drama: { title: '드라마 쇼릴', category: '연기 / 대사' },
@@ -84,8 +82,6 @@ function ShowreelCard({ reel }: { reel: Reel }) {
 	const [shouldPreload, setShouldPreload] = useState(false)
 	const [playing, setPlaying] = useState(false)
 
-	// Как только карточка приближается к вьюпорту (за 600px до появления) —
-	// монтируем скрытый iframe и начинаем прогрев буфера
 	useEffect(() => {
 		if (!cardRef.current || shouldPreload) return
 
@@ -96,13 +92,12 @@ function ShowreelCard({ reel }: { reel: Reel }) {
 					observer.disconnect()
 				}
 			},
-			{ rootMargin: '600px 0px' }
+			{ rootMargin: '600px 0px' },
 		)
 		observer.observe(cardRef.current)
 		return () => observer.disconnect()
 	}, [shouldPreload])
 
-	// Инициализируем Vimeo Player сразу после монтирования iframe
 	useEffect(() => {
 		if (!shouldPreload || !iframeRef.current || playerRef.current) return
 
@@ -180,12 +175,32 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 
 	const reelsData = useMemo<Reel[]>(
 		() => [
-			{ id: 'main', thumb: '/thumbnails/1.webp', url: VIMEO_URL, ...t.reels.main },
-			{ id: 'drama', thumb: '/thumbnails/2.webp', url: VIMEO_URL, ...t.reels.drama },
-			{ id: 'action', thumb: '/thumbnails/3.webp', url: VIMEO_URL, ...t.reels.action },
-			{ id: 'selftape', thumb: '/thumbnails/4.webp', url: VIMEO_URL, ...t.reels.selftape },
+			{
+				id: 'main',
+				thumb: '/thumbnails/1.webp',
+				url: VIMEO_URL,
+				...t.reels.main,
+			},
+			{
+				id: 'drama',
+				thumb: '/thumbnails/2.webp',
+				url: VIMEO_URL,
+				...t.reels.drama,
+			},
+			{
+				id: 'action',
+				thumb: '/thumbnails/3.webp',
+				url: VIMEO_URL,
+				...t.reels.action,
+			},
+			{
+				id: 'selftape',
+				thumb: '/thumbnails/4.webp',
+				url: VIMEO_URL,
+				...t.reels.selftape,
+			},
 		],
-		[t]
+		[t],
 	)
 
 	return (
@@ -205,13 +220,13 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 					href={DRIVE_URL}
 					target='_blank'
 					rel='noopener noreferrer'
-					className='inline-flex items-center gap-3 px-5 py-2.5 border border-neutral-200 rounded-sm hover:bg-neutral-50 transition-all group'
+					className='inline-flex items-center gap-2.5 px-3 py-1.5 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group'
 				>
 					<SiGoogledrive
-						className='text-neutral-400 group-hover:text-[#34A853] transition-colors'
-						size={18}
+						className='text-black group-hover:text-white transition-colors shrink-0'
+						size={14}
 					/>
-					<span className='font-mono text-[10px] uppercase tracking-widest font-bold text-neutral-600'>
+					<span className='font-mono text-[10px] uppercase font-bold tracking-wider'>
 						{t.drive}
 					</span>
 				</a>

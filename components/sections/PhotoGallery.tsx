@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
+import { SiGoogledrive } from 'react-icons/si'
 
 // Swiper: Ядро и необходимые модули
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -18,6 +19,9 @@ import { LuChevronLeft, LuChevronRight } from 'react-icons/lu'
 // Тот же Lightbox
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
+
+const DRIVE_URL =
+	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
 
 // Вспомогательная функция для локали
 function normalizeLocale(locale?: string): 'en' | 'ru' | 'kk' | 'ko' {
@@ -63,34 +67,64 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 	const resolvedLocale = normalizeLocale(locale)
 
 	const t = {
-		en: { heading: 'Gallery', sub: 'Swipe to see portfolio' },
-		ru: { heading: 'Галерея', sub: 'Листайте портфолио' },
-		kk: { heading: 'Галерея', sub: 'Портфолионы көру' },
-		ko: { heading: '갤러리', sub: '포트폴리오 보기' },
+		en: {
+			heading: 'Gallery',
+			sub: 'Swipe to see portfolio',
+			drive: 'Raw Materials',
+		},
+		ru: {
+			heading: 'Галерея',
+			sub: 'Листайте портфолио',
+			drive: 'Исходные материалы',
+		},
+		kk: {
+			heading: 'Галерея',
+			sub: 'Портфолионы көру',
+			drive: 'Бастапқы материалдар',
+		},
+		ko: { heading: '갤러리', sub: '포트폴리오 보기', drive: '원본 자료' },
 	}[resolvedLocale]
 
 	return (
 		<section className='container mx-auto px-4 py-16 scroll-mt-24' id='photos'>
-			{/* Заголовок с кастомными стрелками навигации */}
-			<div className='mb-0 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral-100 pb-8'>
+			{/* Заголовок с кнопкой Google Drive и кастомными стрелками навигации */}
+			<div className='mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral-100 pb-8'>
 				<div className='flex items-center gap-6'>
 					<div className='h-12 w-[3px] bg-[#d90416]' />
 					<h2 className='font-display text-4xl md:text-5xl font-bold uppercase italic tracking-tighter text-black'>
 						{t.heading}
 					</h2>
-					<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400'>
+					<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 hidden sm:inline-block'>
 						// {t.sub}
 					</span>
 				</div>
 
-				{/* Контейнер для кастомных кнопок навигации */}
-				<div className='flex gap-2 self-end md:self-auto'>
-					<button className='swiper-button-prev-custom w-12 h-12 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
-						<LuChevronLeft size={24} />
-					</button>
-					<button className='swiper-button-next-custom w-12 h-12 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
-						<LuChevronRight size={24} />
-					</button>
+				<div className='flex items-center gap-4 self-end md:self-auto'>
+					{/* Кнопка Google Drive */}
+					<a
+						href={DRIVE_URL}
+						target='_blank'
+						rel='noopener noreferrer'
+						className='inline-flex items-center gap-2.5 px-3 py-1.5 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group'
+					>
+						<SiGoogledrive
+							className='text-black group-hover:text-white transition-colors shrink-0'
+							size={14}
+						/>
+						<span className='font-mono text-[10px] uppercase font-bold tracking-wider'>
+							{t.drive}
+						</span>
+					</a>
+
+					{/* Контейнер для кастомных кнопок навигации */}
+					<div className='flex gap-2'>
+						<button className='swiper-button-prev-custom w-9 h-9 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
+							<LuChevronLeft size={20} />
+						</button>
+						<button className='swiper-button-next-custom w-9 h-9 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
+							<LuChevronRight size={20} />
+						</button>
+					</div>
 				</div>
 			</div>
 
@@ -101,11 +135,6 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 					spaceBetween={20}
 					slidesPerView={1}
 					grabCursor={true}
-					// observer/observeParents: Swiper сам пересчитывает раскладку при любом
-					// изменении размеров контейнера. Без этого начальный расчёт слайдов
-					// иногда происходит ДО того, как next/font подменит fallback-шрифт на
-					// настоящий (display:'swap'), из-за чего ширина контейнера меняется
-					// постфактум — и на долю секунды видно 1 слайд на всю ширину вместо 3.
 					observer={true}
 					observeParents={true}
 					mousewheel={{ forceToAxis: true }}
@@ -121,7 +150,7 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 						640: { slidesPerView: 2 },
 						1024: { slidesPerView: 3 },
 					}}
-					className='pb-12' // отступ снизу для пагинации
+					className='pb-12'
 				>
 					{PHOTOS.map((photo, i) => (
 						<SwiperSlide
@@ -154,7 +183,7 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 				</Swiper>
 			</div>
 
-			{/* ПОЛНОЭКРАННЫЙ ПРОСМОТР (LIGHTBOX) - Тот же */}
+			{/* ПОЛНОЭКРАННЫЙ ПРОСМОТР (LIGHTBOX) */}
 			<Lightbox
 				slides={PHOTOS}
 				open={index >= 0}
@@ -173,7 +202,7 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 					opacity: 0.7;
 				}
 				.photo-slider-container .swiper-pagination-bullet-active {
-					background: #ffffff; /* Твой красный цвет */
+					background: #ffffff;
 				}
 			`}</style>
 		</section>
