@@ -85,21 +85,17 @@ export default function Hero({ lang }: HeroProps) {
 	) as LangKey
 	const content = HERO_TRANSLATIONS[currentLang]
 
+	// Разбиваем имя и фамилию
+	const nameParts = content.name.split(' ')
+	const firstName = nameParts[0]
+	const lastName = nameParts.slice(1).join(' ')
+
 	return (
-		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
-		// pt растёт вместе с высотой хедера + добавляется воздух на широких экранах.
 		<section className='pt-20 sm:pt-24 md:pt-28 lg:pt-32 2xl:pt-40 pb-8 sm:pb-10 lg:pb-12 overflow-hidden'>
-			<div className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 2xl:gap-24'>
-				{/*
-					Photo Side.
-					Переключение flex-col → flex-row перенесено с md (768px) на lg (1024px):
-					на планшете в портретной ориентации текстовый блок (языки, параметры,
-					кнопка резюме) слишком плотный для колонки — пусть остаётся стопкой на
-					весь экран планшета и становится "бок о бок" только от настоящего
-					десктопа. Если хочешь вернуть переключение с md — просто замени все
-					`lg:flex-row`/`lg:` у этого блока обратно на `md:`.
-				*/}
-				<div className='flex-1 relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg 2xl:max-w-xl rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
+			{/* Убрали px-4 на мобилке (px-0), оставили со sm брейкпоинта */}
+			<div className='container mx-auto px-0 sm:px-6 lg:px-8 2xl:px-12 flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 2xl:gap-24'>
+				{/* Photo Side: Полноширинный блок на мобилке (w-full, rounded-none), скругление и max-width возвращаются со sm */}
+				<div className='flex-1 relative w-full sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg 2xl:max-w-xl rounded-none sm:rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
 					<Image
 						src='/hero2.jpg'
 						alt={content.name}
@@ -107,21 +103,21 @@ export default function Hero({ lang }: HeroProps) {
 						height={1000}
 						priority
 						sizes='(max-width: 1024px) 100vw, 50vw'
-						/* h-auto — контейнер обтягивает реальные пропорции фото, без обрезки и леттербоксинга */
 						className='w-full h-auto block'
 					/>
 				</div>
 
-				{/* Text Side */}
-				<div className='flex-1 w-full space-y-6 sm:space-y-7 md:space-y-8 2xl:space-y-10'>
+				{/* Text Side: Добавлены отступы px-4 только для мобилок, чтобы текст не лип к краям */}
+				<div className='flex-1 w-full px-4 sm:px-0 space-y-6 sm:space-y-7 md:space-y-8 2xl:space-y-10'>
 					<div className='space-y-3 sm:space-y-4'>
 						<h1
 							style={{
 								fontFamily: 'var(--font-display), "Malgun Gothic", sans-serif',
 							}}
-							className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black uppercase leading-[0.85] sm:leading-[0.8] tracking-tighter'
+							className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black uppercase leading-[0.9] tracking-tighter space-y-[0.1em]'
 						>
-							{content.name}
+							<span className='block'>{firstName}</span>
+							{lastName && <span className='block'>{lastName}</span>}
 						</h1>
 
 						<p className='font-mono text-xs sm:text-sm text-neutral-500 uppercase tracking-[0.15em] sm:tracking-[0.2em]'>

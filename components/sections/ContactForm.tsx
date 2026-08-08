@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react'
 import { toast } from 'sonner'
-import { getContactSchema, type ContactFormValues } from '@/lib/validations/contact'
+import {
+	getContactSchema,
+	type ContactFormValues,
+} from '@/lib/validations/contact'
 
 type ContactFormProps = {
 	locale?: string
@@ -20,7 +23,9 @@ const initialValues: ContactFormValues = {
 
 export const ContactForm = ({ locale }: ContactFormProps) => {
 	const [values, setValues] = useState<ContactFormValues>(initialValues)
-	const [errors, setErrors] = useState<Partial<Record<keyof ContactFormValues, string>>>({})
+	const [errors, setErrors] = useState<
+		Partial<Record<keyof ContactFormValues, string>>
+	>({})
 	const [submitting, setSubmitting] = useState(false)
 
 	const isRu = locale === 'ru'
@@ -28,7 +33,13 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 	const isKk = locale === 'kk' || locale === 'kz'
 
 	const t = {
-		name: isRu ? 'Имя / Студия' : isEn ? 'Name / Studio' : isKk ? 'Аты / Студия' : '이름 / 스튜디오',
+		name: isRu
+			? 'Имя / Студия'
+			: isEn
+				? 'Name / Studio'
+				: isKk
+					? 'Аты / Студия'
+					: '이름 / 스튜디오',
 		projectRole: isRu
 			? 'Проект и роль'
 			: isEn
@@ -66,7 +77,13 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					? 'Хабарлама (міндетті емес)'
 					: '메시지 (선택 사항)',
 		submit: isRu ? 'Отправить' : isEn ? 'Send' : isKk ? 'Жіберу' : '보내기',
-		submitting: isRu ? 'Отправка...' : isEn ? 'Sending...' : isKk ? 'Жіберілуде...' : '전송 중...',
+		submitting: isRu
+			? 'Отправка...'
+			: isEn
+				? 'Sending...'
+				: isKk
+					? 'Жіберілуде...'
+					: '전송 중...',
 		success: isRu
 			? 'Сообщение отправлено! Отвечу как можно скорее.'
 			: isEn
@@ -83,7 +100,10 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					: '메시지를 보내지 못했습니다. 다시 시도하거나 Telegram/WhatsApp으로 직접 연락해 주세요.',
 	}
 
-	const contactOptions: { value: ContactFormValues['preferredContact']; label: string }[] = [
+	const contactOptions: {
+		value: ContactFormValues['preferredContact']
+		label: string
+	}[] = [
 		{ value: 'telegram', label: 'Telegram' },
 		{ value: 'whatsapp', label: 'WhatsApp' },
 		{ value: 'wechat', label: 'WeChat' },
@@ -91,8 +111,8 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 	]
 
 	const handleChange = (field: keyof ContactFormValues, value: string) => {
-		setValues((prev) => ({ ...prev, [field]: value }))
-		if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
+		setValues(prev => ({ ...prev, [field]: value }))
+		if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }))
 	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -138,31 +158,39 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 		}
 	}
 
+	// Mobile-first размеры полей: чуть компактнее на мобильном, растёт к 2xl.
 	const inputClass =
-		'w-full bg-neutral-50 border border-neutral-200 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-[#d90416] transition-colors'
-	const labelClass = 'font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 mb-2 block'
+		'w-full bg-neutral-50 border border-neutral-200 rounded-sm px-3.5 sm:px-4 py-2.5 sm:py-3 2xl:py-3.5 text-sm 2xl:text-base focus:outline-none focus:border-[#d90416] transition-colors'
+	const labelClass =
+		'font-mono text-[9px] sm:text-[10px] 2xl:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 mb-1.5 sm:mb-2 block'
 	const errorClass = 'text-[#d90416] text-xs mt-1 font-mono'
 
 	return (
-		<form onSubmit={handleSubmit} className='max-w-2xl mx-auto text-left mb-16' noValidate>
+		// Структура grid (md:grid-cols-2) не меняется — только отступы/паддинги/шрифты
+		// по sm/md/lg/xl/2xl.
+		<form
+			onSubmit={handleSubmit}
+			className='max-w-2xl 2xl:max-w-3xl mx-auto text-left mb-12 sm:mb-16'
+			noValidate
+		>
 			{/* honeypot — скрыто от людей */}
 			<input
 				type='text'
 				name='company'
 				value={values.company}
-				onChange={(e) => handleChange('company', e.target.value)}
+				onChange={e => handleChange('company', e.target.value)}
 				className='hidden'
 				tabIndex={-1}
 				autoComplete='off'
 			/>
 
-			<div className='grid md:grid-cols-2 gap-6 mb-6'>
+			<div className='grid md:grid-cols-2 gap-4 sm:gap-6 2xl:gap-8 mb-4 sm:mb-6'>
 				<div>
 					<label className={labelClass}>{t.name}</label>
 					<input
 						type='text'
 						value={values.name}
-						onChange={(e) => handleChange('name', e.target.value)}
+						onChange={e => handleChange('name', e.target.value)}
 						className={inputClass}
 					/>
 					{errors.name && <p className={errorClass}>{errors.name}</p>}
@@ -173,33 +201,35 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					<input
 						type='text'
 						value={values.deadline}
-						onChange={(e) => handleChange('deadline', e.target.value)}
+						onChange={e => handleChange('deadline', e.target.value)}
 						placeholder={t.deadlineHint}
 						className={inputClass}
 					/>
 				</div>
 			</div>
 
-			<div className='mb-6'>
+			<div className='mb-4 sm:mb-6'>
 				<label className={labelClass}>{t.projectRole}</label>
 				<input
 					type='text'
 					value={values.projectRole}
-					onChange={(e) => handleChange('projectRole', e.target.value)}
+					onChange={e => handleChange('projectRole', e.target.value)}
 					className={inputClass}
 				/>
-				{errors.projectRole && <p className={errorClass}>{errors.projectRole}</p>}
+				{errors.projectRole && (
+					<p className={errorClass}>{errors.projectRole}</p>
+				)}
 			</div>
 
-			<div className='grid md:grid-cols-2 gap-6 mb-6'>
+			<div className='grid md:grid-cols-2 gap-4 sm:gap-6 2xl:gap-8 mb-4 sm:mb-6'>
 				<div>
 					<label className={labelClass}>{t.preferredContact}</label>
 					<select
 						value={values.preferredContact}
-						onChange={(e) => handleChange('preferredContact', e.target.value)}
+						onChange={e => handleChange('preferredContact', e.target.value)}
 						className={inputClass}
 					>
-						{contactOptions.map((opt) => (
+						{contactOptions.map(opt => (
 							<option key={opt.value} value={opt.value}>
 								{opt.label}
 							</option>
@@ -212,18 +242,20 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					<input
 						type='text'
 						value={values.contactValue}
-						onChange={(e) => handleChange('contactValue', e.target.value)}
+						onChange={e => handleChange('contactValue', e.target.value)}
 						className={inputClass}
 					/>
-					{errors.contactValue && <p className={errorClass}>{errors.contactValue}</p>}
+					{errors.contactValue && (
+						<p className={errorClass}>{errors.contactValue}</p>
+					)}
 				</div>
 			</div>
 
-			<div className='mb-8'>
+			<div className='mb-6 sm:mb-8'>
 				<label className={labelClass}>{t.message}</label>
 				<textarea
 					value={values.message}
-					onChange={(e) => handleChange('message', e.target.value)}
+					onChange={e => handleChange('message', e.target.value)}
 					rows={4}
 					className={inputClass}
 				/>
@@ -232,7 +264,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 			<button
 				type='submit'
 				disabled={submitting}
-				className='w-full md:w-auto px-10 py-4 bg-black text-white font-mono text-xs uppercase tracking-[0.3em] font-bold hover:bg-[#d90416] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
+				className='w-full md:w-auto px-8 sm:px-10 2xl:px-12 py-3.5 sm:py-4 2xl:py-4.5 bg-black text-white font-mono text-xs 2xl:text-sm uppercase tracking-[0.3em] font-bold hover:bg-[#d90416] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'
 			>
 				{submitting ? t.submitting : t.submit}
 			</button>

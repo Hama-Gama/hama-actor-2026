@@ -1,6 +1,18 @@
 HAMA-ACTOR.COM — TODO
 
-remake contacts section, footer.
+crossbrauser
+seo
+autolang detection
+showreel modalka
+contacts icons smaller
+contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
+google drive button style
+dynamic region
+Базируется удалить или заменить
+hero mobile name & last name one line smaller size. ostalnie kak est'.
+hero image top 0 padding margin
+social network style update sdelat' krasivee chitabelnee
+about пересмотреть 
 
 SHARING / SHARE UX
 -------------------
