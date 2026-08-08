@@ -1,5 +1,7 @@
 HAMA-ACTOR.COM — TODO
 
+remake contacts section, footer.
+
 SHARING / SHARE UX
 -------------------
 [ ] Open Graph мета-теги (og:title, og:description, og:image, og:url, twitter:card)

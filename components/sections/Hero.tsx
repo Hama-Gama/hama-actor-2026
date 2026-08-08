@@ -86,51 +86,61 @@ export default function Hero({ lang }: HeroProps) {
 	const content = HERO_TRANSLATIONS[currentLang]
 
 	return (
-		<section className='pt-24 md:pt-28 pb-8 overflow-hidden'>
-			<div className='container mx-auto px-4 flex flex-col md:flex-row items-center gap-12'>
-				{/* Photo Side */}
-				<div className='flex-1 relative w-full max-w-md rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
+		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
+		// pt растёт вместе с высотой хедера + добавляется воздух на широких экранах.
+		<section className='pt-20 sm:pt-24 md:pt-28 lg:pt-32 2xl:pt-40 pb-8 sm:pb-10 lg:pb-12 overflow-hidden'>
+			<div className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 2xl:gap-24'>
+				{/*
+					Photo Side.
+					Переключение flex-col → flex-row перенесено с md (768px) на lg (1024px):
+					на планшете в портретной ориентации текстовый блок (языки, параметры,
+					кнопка резюме) слишком плотный для колонки — пусть остаётся стопкой на
+					весь экран планшета и становится "бок о бок" только от настоящего
+					десктопа. Если хочешь вернуть переключение с md — просто замени все
+					`lg:flex-row`/`lg:` у этого блока обратно на `md:`.
+				*/}
+				<div className='flex-1 relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg 2xl:max-w-xl rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
 					<Image
 						src='/hero2.jpg'
 						alt={content.name}
 						width={800}
 						height={1000}
 						priority
-						sizes='(max-width: 768px) 100vw, 50vw'
+						sizes='(max-width: 1024px) 100vw, 50vw'
 						/* h-auto — контейнер обтягивает реальные пропорции фото, без обрезки и леттербоксинга */
 						className='w-full h-auto block'
 					/>
 				</div>
 
 				{/* Text Side */}
-				<div className='flex-1 space-y-8'>
-					<div className='space-y-4'>
+				<div className='flex-1 w-full space-y-6 sm:space-y-7 md:space-y-8 2xl:space-y-10'>
+					<div className='space-y-3 sm:space-y-4'>
 						<h1
 							style={{
 								fontFamily: 'var(--font-display), "Malgun Gothic", sans-serif',
 							}}
-							className='text-5xl md:text-8xl font-black uppercase leading-[0.8] tracking-tighter'
+							className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black uppercase leading-[0.85] sm:leading-[0.8] tracking-tighter'
 						>
 							{content.name}
 						</h1>
 
-						<p className='font-mono text-sm text-neutral-500 uppercase tracking-[0.2em]'>
+						<p className='font-mono text-xs sm:text-sm text-neutral-500 uppercase tracking-[0.15em] sm:tracking-[0.2em]'>
 							// {content.aka}
 						</p>
 					</div>
 
-					<div className='flex flex-wrap gap-2'>
+					<div className='flex flex-wrap gap-2 sm:gap-2.5 2xl:gap-3'>
 						{content.tags.map(tag => (
 							<span
 								key={tag}
-								className='px-3 py-1 border border-black text-[10px] uppercase font-mono font-bold hover:bg-black hover:text-white transition-colors cursor-default'
+								className='px-2.5 sm:px-3 py-1 sm:py-1.5 border border-black text-[9px] sm:text-[10px] 2xl:text-xs uppercase font-mono font-bold hover:bg-black hover:text-white transition-colors cursor-default'
 							>
 								{tag}
 							</span>
 						))}
 					</div>
 
-					<div className='space-y-3 font-mono text-base uppercase text-neutral-600 pt-4 border-l-2 border-[#d90416] pl-6'>
+					<div className='space-y-2.5 sm:space-y-3 font-mono text-sm sm:text-base 2xl:text-lg uppercase text-neutral-600 pt-2 sm:pt-4 border-l-2 border-[#d90416] pl-4 sm:pl-6 2xl:pl-8'>
 						<p className='flex items-center gap-3'>{content.info.age}</p>
 
 						<p className='flex items-center gap-3'>
@@ -149,8 +159,8 @@ export default function Hero({ lang }: HeroProps) {
 					</div>
 
 					{/* Languages */}
-					<div className='pt-2'>
-						<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 mb-4 block'>
+					<div className='pt-1 sm:pt-2'>
+						<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 mb-3 sm:mb-4 block'>
 							{currentLang === 'ru'
 								? 'Языки'
 								: currentLang === 'kk'
@@ -160,10 +170,10 @@ export default function Hero({ lang }: HeroProps) {
 										: 'Languages'}
 						</span>
 
-						<div className='flex flex-wrap gap-6'>
+						<div className='flex flex-wrap gap-4 sm:gap-6 2xl:gap-8'>
 							{LANGUAGE_LEVELS.map(l => (
 								<div key={l.code} className='flex flex-col items-center gap-2'>
-									<div className='w-5 h-5 rounded-full bg-neutral-50 border border-neutral-200 overflow-hidden shadow-sm'>
+									<div className='w-5 h-5 sm:w-6 sm:h-6 2xl:w-7 2xl:h-7 rounded-full bg-neutral-50 border border-neutral-200 overflow-hidden shadow-sm'>
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
 											src={`https://flagcdn.com/w80/${l.countryCode}.png`}

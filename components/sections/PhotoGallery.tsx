@@ -86,12 +86,16 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 	}[resolvedLocale]
 
 	return (
-		<section className='container mx-auto px-4 py-16 scroll-mt-24' id='photos'>
+		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
+		<section
+			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-10 sm:py-12 lg:py-16 scroll-mt-24'
+			id='photos'
+		>
 			{/* Заголовок с кнопкой Google Drive и кастомными стрелками навигации */}
-			<div className='mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-neutral-100 pb-8'>
-				<div className='flex items-center gap-6'>
-					<div className='h-12 w-[3px] bg-[#d90416]' />
-					<h2 className='font-display text-4xl md:text-5xl font-bold uppercase italic tracking-tighter text-black'>
+			<div className='mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 border-b border-neutral-100 pb-6 sm:pb-8'>
+				<div className='flex items-center gap-3 sm:gap-6'>
+					<div className='h-10 w-[3px] sm:h-12 2xl:h-14 bg-[#d90416]' />
+					<h2 className='font-display text-2xl sm:text-4xl lg:text-5xl 2xl:text-6xl font-bold uppercase italic tracking-tighter text-black'>
 						{t.heading}
 					</h2>
 					<span className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 hidden sm:inline-block'>
@@ -99,30 +103,30 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 					</span>
 				</div>
 
-				<div className='flex items-center gap-4 self-end md:self-auto'>
+				<div className='flex items-center gap-3 sm:gap-4 self-end md:self-auto'>
 					{/* Кнопка Google Drive */}
 					<a
 						href={DRIVE_URL}
 						target='_blank'
 						rel='noopener noreferrer'
-						className='inline-flex items-center gap-2.5 px-3 py-1.5 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group'
+						className='inline-flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-1.5 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group'
 					>
 						<SiGoogledrive
 							className='text-black group-hover:text-white transition-colors shrink-0'
 							size={14}
 						/>
-						<span className='font-mono text-[10px] uppercase font-bold tracking-wider'>
+						<span className='font-mono text-[10px] 2xl:text-xs uppercase font-bold tracking-wider'>
 							{t.drive}
 						</span>
 					</a>
 
 					{/* Контейнер для кастомных кнопок навигации */}
 					<div className='flex gap-2'>
-						<button className='swiper-button-prev-custom w-9 h-9 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
-							<LuChevronLeft size={20} />
+						<button className='swiper-button-prev-custom w-8 h-8 sm:w-9 sm:h-9 2xl:w-11 2xl:h-11 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
+							<LuChevronLeft size={18} className='sm:w-5 sm:h-5' />
 						</button>
-						<button className='swiper-button-next-custom w-9 h-9 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
-							<LuChevronRight size={20} />
+						<button className='swiper-button-next-custom w-8 h-8 sm:w-9 sm:h-9 2xl:w-11 2xl:h-11 flex items-center justify-center border border-neutral-200 rounded-sm hover:border-black hover:bg-black hover:text-white transition-all'>
+							<LuChevronRight size={18} className='sm:w-5 sm:h-5' />
 						</button>
 					</div>
 				</div>
@@ -132,7 +136,7 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 			<div className='photo-slider-container relative'>
 				<Swiper
 					modules={[Navigation, Pagination, Mousewheel]}
-					spaceBetween={20}
+					spaceBetween={16}
 					slidesPerView={1}
 					grabCursor={true}
 					observer={true}
@@ -146,11 +150,14 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 						clickable: true,
 						dynamicBullets: true,
 					}}
+					// Добавлен брейкпоинт 1536 (2xl) — на ultra-wide мониторе есть смысл
+					// показать 4 фото сразу, а не оставлять их растянутыми на 3 колонки.
 					breakpoints={{
-						640: { slidesPerView: 2 },
-						1024: { slidesPerView: 3 },
+						640: { slidesPerView: 2, spaceBetween: 20 },
+						1024: { slidesPerView: 3, spaceBetween: 20 },
+						1536: { slidesPerView: 4, spaceBetween: 24 },
 					}}
-					className='pb-12'
+					className='pb-10 sm:pb-12'
 				>
 					{PHOTOS.map((photo, i) => (
 						<SwiperSlide
@@ -168,12 +175,12 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 									alt={photo.alt}
 									fill
 									className='object-cover transition-transform duration-700 group-hover:scale-105'
-									sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+									sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw'
 								/>
 
 								{/* Оверлей при наведении */}
 								<div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30 flex items-center justify-center'>
-									<div className='font-mono text-[10px] uppercase text-white tracking-widest bg-black/50 px-3 py-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity'>
+									<div className='font-mono text-[9px] sm:text-[10px] uppercase text-white tracking-widest bg-black/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity'>
 										View Fullscreen
 									</div>
 								</div>

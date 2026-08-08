@@ -112,9 +112,15 @@ export default function Header() {
 	const otherLocales = locales.filter(l => l.id !== lang)
 
 	return (
+		// Высоту хедера (h-16 → h-20) намеренно не трогаю сильнее на mobile, чтобы не
+		// разъехался scroll-mt-24 у секций (About/Contacts/Filmography/PhotoGallery/
+		// ShowReel) — они рассчитаны на текущую высоту. Дальше идёт mobile-first
+		// раскладка: без префикса — стили для <640px, дальше слоями sm/md/lg/xl/2xl.
 		<header className='fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100'>
-			<div className='container mx-auto px-4 h-20 flex items-center justify-between'>
-				{/* Wordmark вместо лого, всегда ведёт на главную (с учётом текущего языка) */}
+			<div className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 h-16 sm:h-20 flex items-center justify-between'>
+				{/* Wordmark вместо лого, всегда ведёт на главную (с учётом текущего языка).
+				    Размер шрифта плавно растёт от мобильного к ultra-wide: text-sm на
+				    мобильном → text-lg на десктопе → text-xl на 2xl (большие мониторы). */}
 				<Link
 					href={lang === 'en' ? '/' : `/${lang}`}
 					onClick={() => {
@@ -124,36 +130,38 @@ export default function Header() {
 							window.scrollTo({ top: 0, behavior: 'smooth' })
 						}
 					}}
-					className='font-mono text-sm md:text-base tracking-tight font-bold text-black hover:text-[#d90416] transition-colors'
+					className='font-mono text-sm sm:text-base lg:text-lg 2xl:text-xl tracking-tight font-bold text-black hover:text-[#d90416] transition-colors shrink-0'
 				>
 					hama-actor.com
 				</Link>
 
-				{/* Десктоп-навигация */}
-				<nav className='hidden lg:flex items-center gap-8'>
+				{/* Десктоп-навигация — появляется от lg (1024px) и шире.
+				    Расстояние между пунктами растёт на xl/2xl, чтобы не было пусто на
+				    широких экранах. */}
+				<nav className='hidden lg:flex items-center gap-6 xl:gap-8 2xl:gap-10'>
 					{NAV.map(item => (
 						<a
 							key={item.href}
 							href={item.href}
-							className='font-mono text-[11px] uppercase tracking-widest text-neutral-500 hover:text-black transition-colors'
+							className='font-mono text-[11px] xl:text-xs uppercase tracking-widest text-neutral-500 hover:text-black transition-colors whitespace-nowrap'
 						>
 							{navLabel(item)}
 						</a>
 					))}
 				</nav>
 
-				<div className='flex items-center gap-4 md:gap-6'>
+				<div className='flex items-center gap-3 sm:gap-4 md:gap-6 2xl:gap-8'>
 					<button
 						onClick={handleShare}
-						className='p-2 text-neutral-600 hover:text-black transition cursor-pointer'
+						className='p-1.5 sm:p-2 text-neutral-600 hover:text-black transition cursor-pointer'
 						aria-label='Share'
 					>
-						<LuShare2 size={18} />
+						<LuShare2 size={18} className='sm:w-[18px] sm:h-[18px]' />
 					</button>
 
 					{/* Языковой дропдаун */}
 					<div
-						className='relative border-l pl-4 md:pl-6 border-neutral-200'
+						className='relative border-l pl-3 sm:pl-4 md:pl-6 border-neutral-200'
 						ref={langRef}
 					>
 						<button
@@ -161,7 +169,9 @@ export default function Header() {
 							className='flex items-center gap-1.5 text-neutral-600 hover:text-black transition cursor-pointer'
 						>
 							<Globe size={18} />
-							<span className='font-mono text-[10px] uppercase font-bold'>
+							{/* Код языка (EN/RU/KZ/KO) на самых узких экранах прячем, чтобы
+							    иконки не слипались — от sm показываем как обычно. */}
+							<span className='hidden sm:inline font-mono text-[10px] uppercase font-bold'>
 								{activeLocale.label}
 							</span>
 							<ChevronDown
@@ -171,7 +181,7 @@ export default function Header() {
 						</button>
 
 						{langOpen && (
-							<div className='absolute right-0 top-full mt-3 w-44 bg-white border border-neutral-100 rounded-sm shadow-lg overflow-hidden'>
+							<div className='absolute right-0 top-full mt-3 w-44 sm:w-48 2xl:w-56 bg-white border border-neutral-100 rounded-sm shadow-lg overflow-hidden'>
 								{otherLocales.map(l => (
 									<Link
 										key={l.id}
@@ -195,10 +205,10 @@ export default function Header() {
 						)}
 					</div>
 
-					{/* Мобильное меню — бургер */}
+					{/* Мобильное меню — бургер, скрывается от lg (там уже видна десктоп-нав) */}
 					<button
 						onClick={() => setMenuOpen(v => !v)}
-						className='lg:hidden p-2 text-neutral-600 hover:text-black transition cursor-pointer'
+						className='lg:hidden p-1.5 sm:p-2 text-neutral-600 hover:text-black transition cursor-pointer'
 						aria-label='Menu'
 					>
 						{menuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -206,24 +216,29 @@ export default function Header() {
 				</div>
 			</div>
 
-			{/* Затемняющий фон позади мобильного меню — клик по нему закрывает меню */}
+			{/* Затемняющий фон позади мобильного меню — клик по нему закрывает меню.
+			    top-16 на мобильном (совпадает с h-16 хедера), top-20 от sm (совпадает
+			    с h-20) — иначе на маленьких экранах остаётся светлая полоса под хедером. */}
 			{menuOpen && (
 				<div
-					className='lg:hidden fixed inset-0 top-20 bg-black/50 z-40'
+					className='lg:hidden fixed inset-0 top-16 sm:top-20 bg-black/50 z-40'
 					onClick={() => setMenuOpen(false)}
 				/>
 			)}
 
-			{/* Мобильная навигация — тёмная панель, выпадает под хедером */}
+			{/* Мобильная навигация — тёмная панель, выпадает под хедером.
+			    На узком мобильном — список в один столбец, от sm (планшет/крупный
+			    телефон в альбомной ориентации) — сетка в 2 колонки, чтобы не тянуться
+			    вертикально и не занимать весь экран без необходимости. */}
 			{menuOpen && (
 				<nav className='lg:hidden absolute top-full left-0 w-full bg-neutral-950 shadow-xl z-50'>
-					<div className='container mx-auto px-4 py-4 flex flex-col gap-1'>
+					<div className='container mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-x-6'>
 						{NAV.map(item => (
 							<a
 								key={item.href}
 								href={item.href}
 								onClick={() => setMenuOpen(false)}
-								className='font-mono text-xs uppercase tracking-widest text-neutral-300 hover:text-white py-3 border-b border-white/10 last:border-0 transition-colors'
+								className='font-mono text-xs uppercase tracking-widest text-neutral-300 hover:text-white py-3 border-b border-white/10 transition-colors'
 							>
 								{navLabel(item)}
 							</a>

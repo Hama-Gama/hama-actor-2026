@@ -118,15 +118,15 @@ function ShowreelCard({ reel }: { reel: Reel }) {
 	return (
 		<div
 			ref={cardRef}
-			className='group relative overflow-hidden rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'
+			className='group relative overflow-hidden rounded-lg sm:rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'
 		>
-			<div className='relative aspect-video w-full bg-black overflow-hidden rounded-2xl'>
+			<div className='relative aspect-video w-full bg-black overflow-hidden rounded-lg sm:rounded-2xl'>
 				{shouldPreload && (
 					<iframe
 						ref={iframeRef}
 						src={`${reel.url}&autoplay=0`}
 						title={reel.title}
-						className={`absolute inset-0 h-full w-full rounded-xl transition-opacity duration-300 ${
+						className={`absolute inset-0 h-full w-full rounded-lg sm:rounded-xl transition-opacity duration-300 ${
 							playing ? 'opacity-100' : 'opacity-0 pointer-events-none'
 						}`}
 						allow='autoplay; fullscreen'
@@ -146,19 +146,23 @@ function ShowreelCard({ reel }: { reel: Reel }) {
 							alt={reel.title}
 							fill
 							className='object-cover transition-transform duration-1000 group-hover:scale-105'
-							sizes='(max-width: 768px) 100vw, 50vw'
+							sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw'
 						/>
 						<div className='absolute inset-0 bg-black/50 transition-opacity group-hover:bg-black/30' />
 						<div className='absolute inset-0 flex items-center justify-center'>
-							<div className='flex h-16 w-16 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
-								<Play fill='currentColor' size={24} className='ml-1' />
+							<div className='flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 2xl:h-20 2xl:w-20 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
+								<Play
+									fill='currentColor'
+									size={22}
+									className='ml-1 sm:w-6 sm:h-6'
+								/>
 							</div>
 						</div>
-						<div className='absolute inset-x-0 bottom-0 p-8 text-left'>
-							<span className='mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#d90416]'>
+						<div className='absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 2xl:p-10 text-left'>
+							<span className='mb-1.5 sm:mb-2 block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#d90416]'>
 								{reel.category}
 							</span>
-							<h3 className='font-display text-2xl md:text-3xl font-bold leading-tight text-white'>
+							<h3 className='font-display text-lg sm:text-2xl lg:text-3xl 2xl:text-4xl font-bold leading-tight text-white'>
 								{reel.title}
 							</h3>
 						</div>
@@ -204,14 +208,15 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 	)
 
 	return (
+		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
 		<section
-			className='container mx-auto px-4 py-8 scroll-mt-24'
+			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 scroll-mt-24'
 			id='showreels'
 		>
-			<div className='mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6'>
-				<div className='flex items-center gap-6'>
-					<div className='h-12 w-[3px] bg-[#d90416]' />
-					<h2 className='font-display text-2xl md:text-3xl font-bold uppercase tracking-tighter text-black'>
+			<div className='mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6'>
+				<div className='flex items-center gap-4 sm:gap-6'>
+					<div className='h-10 w-[3px] sm:h-12 2xl:h-14 bg-[#d90416]' />
+					<h2 className='font-display text-xl sm:text-2xl lg:text-3xl 2xl:text-4xl font-bold uppercase tracking-tighter text-black'>
 						{t.heading}
 					</h2>
 				</div>
@@ -220,19 +225,26 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 					href={DRIVE_URL}
 					target='_blank'
 					rel='noopener noreferrer'
-					className='inline-flex items-center gap-2.5 px-3 py-1.5 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group'
+					className='inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-2 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group self-start md:self-auto'
 				>
 					<SiGoogledrive
 						className='text-black group-hover:text-white transition-colors shrink-0'
 						size={14}
 					/>
-					<span className='font-mono text-[10px] uppercase font-bold tracking-wider'>
+					<span className='font-mono text-[10px] 2xl:text-xs uppercase font-bold tracking-wider'>
 						{t.drive}
 					</span>
 				</a>
 			</div>
 
-			<div className='grid grid-cols-1 gap-10 md:grid-cols-2'>
+			{/*
+				Грид переключается на 2 колонки уже с md (768px), а не с lg, как в Hero —
+				у карточек showreel фиксированное соотношение сторон aspect-video, поэтому
+				они не "сплющиваются" на планшете так, как плотный текстовый блок Hero.
+				На xl/2xl оставляю 2 колонки (4 видео = аккуратная сетка 2×2), но с
+				бóльшим gap, чтобы на широком экране карточки не были прижаты друг к другу.
+			*/}
+			<div className='grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:gap-10 xl:gap-12 2xl:gap-16'>
 				{reelsData.map(reel => (
 					<ShowreelCard key={reel.id} reel={reel} />
 				))}

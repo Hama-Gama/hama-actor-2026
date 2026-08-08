@@ -201,28 +201,50 @@ export const Filmography = ({ locale }: FilmographyProps) => {
 	}
 
 	return (
+		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
 		<section
-			className='container mx-auto px-4 py-8 border-t border-neutral-100 scroll-mt-24'
+			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 border-t border-neutral-100 scroll-mt-24'
 			id='filmography'
 		>
-			<div className='mb-2'>
-				<span className='font-mono text-[10px] uppercase tracking-[0.4em] text-[#d90416] mb-4 block font-bold'>
+			<div className='mb-6 sm:mb-2'>
+				<span className='font-mono text-[10px] uppercase tracking-[0.4em] text-[#d90416] mb-3 sm:mb-4 block font-bold'>
 					// {t.sub}
 				</span>
-				<h2 className='font-display text-3xl md:text-4xl font-bold uppercase italic tracking-tighter'>
+				<h2 className='font-display text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-bold uppercase italic tracking-tighter'>
 					{t.heading}
 				</h2>
 			</div>
 
-			<div className='divide-y divide-neutral-100 border-t border-b border-neutral-100'>
+			{/*
+				Адаптивная раскладка:
+				- Мобильный/планшет (<lg, <1024px): одна колонка, список строками —
+				  постер слева (миниатюра), текст справа. divide-y рисует разделители
+				  между строками, как в обычном списке.
+				- lg и шире (≥1024px): переключение на GRID-карточки — постер сверху
+				  во всю ширину карточки, текст под ним. Разделители-линии убираются
+				  (у карточек своя рамка), колонок становится больше по мере роста
+				  экрана: 2 → 3 (xl) → 4 (2xl), как в каталоге крупной кино-платформы.
+			*/}
+			<div
+				className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4
+				gap-x-6 lg:gap-6 xl:gap-7 2xl:gap-8
+				divide-y divide-neutral-100 lg:divide-y-0
+				border-t border-b lg:border-none'
+			>
 				{credits.map((credit, i) => {
 					const title = credit.project[langKey]
 					const hasPoster = Boolean(credit.posterUrl)
 
 					return (
-						<div key={i} className='flex gap-4 sm:gap-6 py-5 items-start'>
-							{/* Постер — миниатюра, кликабельна только если есть чем открыть.
-							    Пропорции 2:3 — стандарт киноплакатов (как на IMDb/Letterboxd). */}
+						<div
+							key={i}
+							className='flex lg:flex-col gap-4 sm:gap-6 lg:gap-0 py-5 lg:py-0 items-start
+							lg:border lg:border-neutral-100 lg:rounded-sm lg:overflow-hidden
+							lg:hover:border-neutral-300 lg:transition-colors'
+						>
+							{/* Постер — миниатюра-строка на мобильном, полноширинная
+							    карточка сверху от lg. Пропорции 2:3 — стандарт киноплаката
+							    (как на IMDb/Letterboxd). Кликабельна только если есть постер. */}
 							<button
 								type='button'
 								disabled={!hasPoster}
@@ -231,7 +253,8 @@ export const Filmography = ({ locale }: FilmographyProps) => {
 									setActivePoster({ url: credit.posterUrl as string, title })
 								}
 								title={hasPoster ? title : t.noPoster}
-								className={`relative w-16 sm:w-20 md:w-24 aspect-[2/3] shrink-0 rounded-sm overflow-hidden border border-neutral-200 bg-neutral-100 ${
+								className={`relative w-16 sm:w-20 md:w-24 lg:w-full aspect-[2/3] shrink-0 lg:shrink
+								rounded-sm lg:rounded-none overflow-hidden border border-neutral-200 lg:border-0 bg-neutral-100 ${
 									hasPoster
 										? 'cursor-pointer hover:opacity-80 transition-opacity'
 										: 'cursor-default'
@@ -251,12 +274,12 @@ export const Filmography = ({ locale }: FilmographyProps) => {
 								)}
 							</button>
 
-							<div className='flex-1 min-w-0'>
+							<div className='flex-1 lg:flex-none min-w-0 lg:w-full lg:p-4'>
 								<div className='flex flex-wrap items-baseline gap-x-3 gap-y-1'>
 									<span className='font-mono text-xs text-neutral-400'>
 										{credit.year}
 									</span>
-									<h3 className='font-display text-xl font-bold italic'>
+									<h3 className='font-display text-lg sm:text-xl 2xl:text-2xl font-bold italic'>
 										{title}
 									</h3>
 									<span className='font-mono text-[10px] uppercase tracking-widest text-[#d90416] font-bold'>
@@ -284,7 +307,7 @@ export const Filmography = ({ locale }: FilmographyProps) => {
 					onClick={() => setActivePoster(null)}
 				>
 					<div
-						className='relative w-full max-w-sm'
+						className='relative w-full max-w-xs sm:max-w-sm 2xl:max-w-md'
 						onClick={e => e.stopPropagation()}
 					>
 						<button

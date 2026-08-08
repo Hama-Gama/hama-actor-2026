@@ -261,14 +261,19 @@ export const About = ({ locale }: { locale?: string }) => {
 	}
 
 	return (
-		<section className='container mx-auto px-4 py-8 scroll-mt-24' id='about'>
-			<div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
+		// Структура grid/flex НЕ меняется — только отступы, паддинги, размеры шрифта.
+		<section
+			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 scroll-mt-24'
+			id='about'
+		>
+			<div className='grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10 2xl:gap-12'>
 				{/* Specs Table */}
 				<div>
-					<div className='mb-4 flex items-center justify-between gap-6'>
-						<div className='flex items-center gap-6'>
-							<div className='h-12 w-[3px] bg-[#d90416]' />
-							<h2 className='font-display text-4xl font-bold uppercase italic tracking-tighter'>
+					<div className='mb-4 sm:mb-6 flex items-center justify-between gap-4 sm:gap-6'>
+						<div className='flex items-center gap-4 sm:gap-6'>
+							<div className='h-10 w-[3px] sm:h-12 2xl:h-14 bg-[#d90416]' />
+							<h2 className='font-display text-3xl sm:text-4xl lg:text-5xl 2xl:text-6xl font-bold uppercase italic tracking-tighter'>
 								{t.heading}
 							</h2>
 						</div>
@@ -276,22 +281,22 @@ export const About = ({ locale }: { locale?: string }) => {
 							type='button'
 							onClick={handleCopy}
 							title={t.copyHint}
-							className='flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 text-neutral-400 hover:border-black hover:text-black transition-colors cursor-pointer shrink-0'
+							className='flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 2xl:w-10 2xl:h-10 rounded-full border border-neutral-200 text-neutral-400 hover:border-black hover:text-black transition-colors cursor-pointer shrink-0'
 						>
 							<Copy size={15} />
 						</button>
 					</div>
 
-					<div className='max-w-md space-y-4 border-t border-neutral-100 pt-2'>
+					<div className='max-w-md space-y-3 sm:space-y-4 border-t border-neutral-100 pt-2'>
 						{Object.values(t.data).map((item, i) => (
 							<div
 								key={i}
 								className='flex justify-between items-end border-b border-neutral-50 pb-2'
 							>
-								<span className='font-mono text-[10px] uppercase text-neutral-400 tracking-widest'>
+								<span className='font-mono text-[10px] 2xl:text-xs uppercase text-neutral-400 tracking-widest'>
 									{item.label}
 								</span>
-								<span className='font-sans font-bold text-xl uppercase italic'>
+								<span className='font-sans font-bold text-lg sm:text-xl 2xl:text-2xl uppercase italic'>
 									{item.val}
 								</span>
 							</div>
@@ -300,14 +305,14 @@ export const About = ({ locale }: { locale?: string }) => {
 				</div>
 
 				{/* Skills Grid */}
-				<div className='bg-neutral-900 p-10 text-white rounded-sm relative overflow-hidden'>
+				<div className='bg-neutral-900 p-6 sm:p-8 lg:p-10 2xl:p-12 text-white rounded-sm relative overflow-hidden'>
 					<div className='absolute top-0 right-0 p-4 font-mono text-[8px] opacity-20 uppercase tracking-[0.5em] vertical-text'>
 						Arkayev Performance
 					</div>
-					<h3 className='font-mono text-[10px] uppercase tracking-[0.3em] text-[#d90416] mb-2 font-bold'>
+					<h3 className='font-mono text-[10px] 2xl:text-xs uppercase tracking-[0.3em] text-[#d90416] mb-2 sm:mb-3 font-bold'>
 						// {t.skillsHeading}
 					</h3>
-					<div className='grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-3'>
+					<div className='grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 sm:gap-y-3 gap-x-2.5 sm:gap-x-3 2xl:gap-y-4 2xl:gap-x-4'>
 						{t.skillList.map((skill, i) => {
 							const Icon = skill.icon
 							const content = (
@@ -318,7 +323,7 @@ export const About = ({ locale }: { locale?: string }) => {
 											<Play size={10} fill='currentColor' className='ml-0.5' />
 										</span>
 									)}
-									<span className='order-3 sm:order-2 font-sans uppercase text-sm font-bold tracking-tight opacity-90 flex-1 text-left'>
+									<span className='order-3 sm:order-2 font-sans uppercase text-sm 2xl:text-base font-bold tracking-tight opacity-90 flex-1 text-left'>
 										{skill[skillKey]}
 									</span>
 								</>
@@ -334,13 +339,13 @@ export const About = ({ locale }: { locale?: string }) => {
 									key={i}
 									type='button'
 									onClick={() => setActiveVideo(skill.videoUrl)}
-									className='flex items-center gap-2.5 py-2.5 px-3 rounded-sm border border-white/20 hover:border-[#d90416]/50 hover:bg-white/5 active:bg-white/10 transition-colors cursor-pointer text-left'
+									className='flex items-center gap-2.5 py-2.5 px-3 2xl:py-3 2xl:px-3.5 rounded-sm border border-white/20 hover:border-[#d90416]/50 hover:bg-white/5 active:bg-white/10 transition-colors cursor-pointer text-left'
 								>
 									{content}
 								</button>
 							) : (
 								<div
-									className='flex items-center gap-2.5 py-2.5 px-3 rounded-sm border border-white/20'
+									className='flex items-center gap-2.5 py-2.5 px-3 2xl:py-3 2xl:px-3.5 rounded-sm border border-white/20'
 									key={i}
 								>
 									{content}
@@ -352,23 +357,25 @@ export const About = ({ locale }: { locale?: string }) => {
 			</div>
 
 			{/* Sizes & Measurements — full width, for wardrobe / stunt coordination */}
-			<div className='mt-8 border border-neutral-100 rounded-sm p-6 md:p-8'>
-				<div className='flex items-baseline justify-between mb-6 flex-wrap gap-2'>
-					<h3 className='font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-400 font-bold'>
+			<div className='mt-6 sm:mt-8 lg:mt-10 border border-neutral-100 rounded-sm p-5 sm:p-6 md:p-8 2xl:p-10'>
+				<div className='flex items-baseline justify-between mb-5 sm:mb-6 flex-wrap gap-2'>
+					<h3 className='font-mono text-[10px] 2xl:text-xs uppercase tracking-[0.3em] text-neutral-400 font-bold'>
 						// {t.sizesHeading}
 					</h3>
-					<span className='font-mono text-[9px] uppercase tracking-widest text-neutral-300'>
+					<span className='font-mono text-[9px] 2xl:text-[10px] uppercase tracking-widest text-neutral-300'>
 						{t.sizesNote}
 					</span>
 				</div>
 
-				<div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-5'>
+				<div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 sm:gap-x-6 2xl:gap-x-8 gap-y-4 sm:gap-y-5 2xl:gap-y-6'>
 					{Object.values(t.sizes).map((item, i) => (
 						<div key={i} className='flex flex-col gap-1'>
-							<span className='font-mono text-[9px] uppercase text-neutral-400 tracking-widest'>
+							<span className='font-mono text-[9px] 2xl:text-[10px] uppercase text-neutral-400 tracking-widest'>
 								{item.label}
 							</span>
-							<span className='font-sans font-bold text-sm'>{item.val}</span>
+							<span className='font-sans font-bold text-sm 2xl:text-base'>
+								{item.val}
+							</span>
 						</div>
 					))}
 				</div>
@@ -381,7 +388,7 @@ export const About = ({ locale }: { locale?: string }) => {
 					onClick={() => setActiveVideo(null)}
 				>
 					<div
-						className='relative w-full max-w-sm'
+						className='relative w-full max-w-xs sm:max-w-sm 2xl:max-w-md'
 						onClick={e => e.stopPropagation()}
 					>
 						<button
