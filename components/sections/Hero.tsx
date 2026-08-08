@@ -89,15 +89,16 @@ export default function Hero({ lang }: HeroProps) {
 		<section className='pt-24 md:pt-28 pb-8 overflow-hidden'>
 			<div className='container mx-auto px-4 flex flex-col md:flex-row items-center gap-12'>
 				{/* Photo Side */}
-				<div className='flex-1 relative aspect-[3/4] w-full max-w-md bg-neutral-100 overflow-hidden rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.01]'>
+				<div className='flex-1 relative w-full max-w-md rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
 					<Image
 						src='/hero2.jpg'
 						alt={content.name}
-						fill
+						width={800}
+						height={1000}
 						priority
 						sizes='(max-width: 768px) 100vw, 50vw'
-						/* object-contain — фото не обрезается, видно целиком в оригинальных пропорциях */
-						className='object-contain transition-all duration-1000'
+						/* h-auto — контейнер обтягивает реальные пропорции фото, без обрезки и леттербоксинга */
+						className='w-full h-auto block'
 					/>
 				</div>
 
