@@ -91,7 +91,7 @@ export default function Hero({ lang }: HeroProps) {
 	const lastName = nameParts.slice(1).join(' ')
 
 	return (
-		<section className='pt-20 sm:pt-24 md:pt-28 lg:pt-32 2xl:pt-40 pb-8 sm:pb-10 lg:pb-12 overflow-hidden'>
+		<section className='pt-16 sm:pt-24 md:pt-28 lg:pt-32 2xl:pt-40 pb-8 sm:pb-10 lg:pb-12 overflow-hidden'>
 			{/* Убрали px-4 на мобилке (px-0), оставили со sm брейкпоинта */}
 			<div className='container mx-auto px-0 sm:px-6 lg:px-8 2xl:px-12 flex flex-col lg:flex-row items-center gap-8 sm:gap-10 md:gap-12 lg:gap-16 2xl:gap-24'>
 				{/* Photo Side: Полноширинный блок на мобилке (w-full, rounded-none), скругление и max-width возвращаются со sm */}

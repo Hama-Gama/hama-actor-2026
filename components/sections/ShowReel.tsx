@@ -17,7 +17,6 @@ const DRIVE_URL =
 const TRANSLATIONS = {
 	en: {
 		heading: 'Showreels',
-		drive: 'Raw Materials',
 		reels: {
 			main: { title: 'Main Showreel', category: 'General Portfolio' },
 			drama: { title: 'Drama Showreel', category: 'Acting / Dialogue' },
@@ -27,7 +26,6 @@ const TRANSLATIONS = {
 	},
 	ru: {
 		heading: 'Шоурилы',
-		drive: 'Исходные материалы',
 		reels: {
 			main: { title: 'Основной шоурил', category: 'Общее портфолио' },
 			drama: { title: 'Драматический шоурил', category: 'Актёрская игра' },
@@ -37,7 +35,6 @@ const TRANSLATIONS = {
 	},
 	kk: {
 		heading: 'Шоурилдер',
-		drive: 'Бастапқы материалдар',
 		reels: {
 			main: { title: 'Негізгі шоурил', category: 'Жалпы портфолио' },
 			drama: { title: 'Драмалық шоурил', category: 'Актёрлік шеберлік' },
@@ -47,7 +44,6 @@ const TRANSLATIONS = {
 	},
 	ko: {
 		heading: '쇼릴',
-		drive: '원본 자료',
 		reels: {
 			main: { title: '메인 쇼릴', category: '전체 포트폴리오' },
 			drama: { title: '드라마 쇼릴', category: '연기 / 대사' },
@@ -213,7 +209,7 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 scroll-mt-24'
 			id='showreels'
 		>
-			<div className='mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6'>
+			<div className='mb-6 sm:mb-8 flex items-center justify-between gap-4 w-full'>
 				<div className='flex items-center gap-4 sm:gap-6'>
 					<div className='h-10 w-[3px] sm:h-12 2xl:h-14 bg-[#d90416]' />
 					<h2 className='font-display text-xl sm:text-2xl lg:text-3xl 2xl:text-4xl font-bold uppercase tracking-tighter text-black'>
@@ -225,25 +221,18 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 					href={DRIVE_URL}
 					target='_blank'
 					rel='noopener noreferrer'
-					className='inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-2 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group self-start md:self-auto'
+					className='inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-2 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group shrink-0'
 				>
 					<SiGoogledrive
 						className='text-black group-hover:text-white transition-colors shrink-0'
 						size={14}
 					/>
-					<span className='font-mono text-[10px] 2xl:text-xs uppercase font-bold tracking-wider'>
-						{t.drive}
+					<span className='font-mono text-[10px] 2xl:text-xs uppercase font-bold tracking-wider whitespace-nowrap'>
+						Google Drive
 					</span>
 				</a>
 			</div>
 
-			{/*
-				Грид переключается на 2 колонки уже с md (768px), а не с lg, как в Hero —
-				у карточек showreel фиксированное соотношение сторон aspect-video, поэтому
-				они не "сплющиваются" на планшете так, как плотный текстовый блок Hero.
-				На xl/2xl оставляю 2 колонки (4 видео = аккуратная сетка 2×2), но с
-				бóльшим gap, чтобы на широком экране карточки не были прижаты друг к другу.
-			*/}
 			<div className='grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:gap-10 xl:gap-12 2xl:gap-16'>
 				{reelsData.map(reel => (
 					<ShowreelCard key={reel.id} reel={reel} />
