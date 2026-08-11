@@ -1,14 +1,15 @@
 HAMA-ACTOR.COM — TODO
 
 crossbrauser
+
 seo
+
 autolang detection
+
 showreel modalka
 
 contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
 
-dynamic region
-Базируется удалить или заменить
 hero mobile name & last name one line smaller size. ostalnie kak est'.
 
 social network style update sdelat' krasivee chitabelnee

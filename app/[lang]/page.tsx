@@ -1,7 +1,6 @@
 import Header from '@/components/layout/Header'
 import Hero from '@/components/sections/Hero'
 import Footer from '@/components/layout/Footer'
-import { Toaster } from 'react-hot-toast'
 import { ShowReel } from '@/components/sections/ShowReel'
 import { PhotoGallery } from '@/components/sections/PhotoGallery'
 import { About } from '@/components/sections/About'
@@ -17,7 +16,6 @@ export default async function HomePage({
 
 	return (
 		<main>
-			<Toaster position='bottom-right' />
 			<Header />
 			<Hero lang={lang} />
 			<ShowReel locale={lang} />

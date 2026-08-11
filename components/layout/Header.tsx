@@ -185,7 +185,7 @@ export default function Header() {
 								{otherLocales.map(l => (
 									<Link
 										key={l.id}
-										href={l.id === 'en' ? '/' : `/${l.id}`}
+										href={`/${l.id}`}
 										scroll={false}
 										onClick={() => setLangOpen(false)}
 										className='flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors'
