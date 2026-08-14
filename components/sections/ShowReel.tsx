@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Play } from 'lucide-react'
+import React, { useState } from 'react'
+import { Play, X } from 'lucide-react'
 import { SiGoogledrive } from 'react-icons/si'
 import Image from 'next/image'
-import VimeoPlayer from '@vimeo/player'
 
 type ShowReelProps = {
 	locale?: string
@@ -17,6 +16,7 @@ const DRIVE_URL =
 const TRANSLATIONS = {
 	en: {
 		heading: 'Showreels',
+		close: 'Close',
 		reels: {
 			main: { title: 'Main Showreel', category: 'General Portfolio' },
 			drama: { title: 'Drama Showreel', category: 'Acting / Dialogue' },
@@ -26,6 +26,7 @@ const TRANSLATIONS = {
 	},
 	ru: {
 		heading: 'Шоурилы',
+		close: 'Закрыть',
 		reels: {
 			main: { title: 'Основной шоурил', category: 'Общее портфолио' },
 			drama: { title: 'Драматический шоурил', category: 'Актёрская игра' },
@@ -35,6 +36,7 @@ const TRANSLATIONS = {
 	},
 	kk: {
 		heading: 'Шоурилдер',
+		close: 'Жабу',
 		reels: {
 			main: { title: 'Негізгі шоурил', category: 'Жалпы портфолио' },
 			drama: { title: 'Драмалық шоурил', category: 'Актёрлік шеберлік' },
@@ -44,6 +46,7 @@ const TRANSLATIONS = {
 	},
 	ko: {
 		heading: '쇼릴',
+		close: '닫기',
 		reels: {
 			main: { title: '메인 쇼릴', category: '전체 포트폴리오' },
 			drama: { title: '드라마 쇼릴', category: '연기 / 대사' },
@@ -70,100 +73,53 @@ type Reel = {
 	category: string
 }
 
-function ShowreelCard({ reel }: { reel: Reel }) {
-	const cardRef = useRef<HTMLDivElement>(null)
-	const iframeRef = useRef<HTMLIFrameElement>(null)
-	const playerRef = useRef<VimeoPlayer | null>(null)
-
-	const [shouldPreload, setShouldPreload] = useState(false)
-	const [playing, setPlaying] = useState(false)
-
-	useEffect(() => {
-		if (!cardRef.current || shouldPreload) return
-
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting) {
-					setShouldPreload(true)
-					observer.disconnect()
-				}
-			},
-			{ rootMargin: '600px 0px' },
-		)
-		observer.observe(cardRef.current)
-		return () => observer.disconnect()
-	}, [shouldPreload])
-
-	useEffect(() => {
-		if (!shouldPreload || !iframeRef.current || playerRef.current) return
-
-		const player = new VimeoPlayer(iframeRef.current)
-		playerRef.current = player
-
-		return () => {
-			player.unload().catch(() => {})
-			playerRef.current = null
-		}
-	}, [shouldPreload])
-
-	const handlePlay = useCallback(() => {
-		setPlaying(true)
-		playerRef.current?.play().catch(() => {})
-	}, [])
-
+// Карточка теперь только показывает превью + кнопку play — само видео
+// (iframe) больше не грузится внутри карточки вообще, только по клику
+// в модалке. Это заодно чинит и производительность: раньше iframe
+// подгружался заранее через IntersectionObserver даже если юзер так и не
+// нажал play.
+function ShowreelCard({
+	reel,
+	onPlay,
+}: {
+	reel: Reel
+	onPlay: (reel: Reel) => void
+}) {
 	return (
-		<div
-			ref={cardRef}
-			className='group relative overflow-hidden rounded-lg sm:rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'
-		>
+		<div className='group relative overflow-hidden rounded-lg sm:rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'>
 			<div className='relative aspect-video w-full bg-black overflow-hidden rounded-lg sm:rounded-2xl'>
-				{shouldPreload && (
-					<iframe
-						ref={iframeRef}
-						src={`${reel.url}&autoplay=0`}
-						title={reel.title}
-						className={`absolute inset-0 h-full w-full rounded-lg sm:rounded-xl transition-opacity duration-300 ${
-							playing ? 'opacity-100' : 'opacity-0 pointer-events-none'
-						}`}
-						allow='autoplay; fullscreen'
-						allowFullScreen
+				<button
+					type='button'
+					aria-label={`Play ${reel.title}`}
+					className='absolute inset-0 block h-full w-full cursor-pointer'
+					onClick={() => onPlay(reel)}
+				>
+					<Image
+						src={reel.thumb}
+						alt={reel.title}
+						fill
+						className='object-cover transition-transform duration-1000 group-hover:scale-105'
+						sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw'
 					/>
-				)}
-
-				{!playing && (
-					<button
-						type='button'
-						aria-label={`Play ${reel.title}`}
-						className='absolute inset-0 block h-full w-full cursor-pointer'
-						onClick={handlePlay}
-					>
-						<Image
-							src={reel.thumb}
-							alt={reel.title}
-							fill
-							className='object-cover transition-transform duration-1000 group-hover:scale-105'
-							sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw'
-						/>
-						<div className='absolute inset-0 bg-black/50 transition-opacity group-hover:bg-black/30' />
-						<div className='absolute inset-0 flex items-center justify-center'>
-							<div className='flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 2xl:h-20 2xl:w-20 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
-								<Play
-									fill='currentColor'
-									size={22}
-									className='ml-1 sm:w-6 sm:h-6'
-								/>
-							</div>
+					<div className='absolute inset-0 bg-black/50 transition-opacity group-hover:bg-black/30' />
+					<div className='absolute inset-0 flex items-center justify-center'>
+						<div className='flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 2xl:h-20 2xl:w-20 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
+							<Play
+								fill='currentColor'
+								size={22}
+								className='ml-1 sm:w-6 sm:h-6'
+							/>
 						</div>
-						<div className='absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 2xl:p-10 text-left'>
-							<span className='mb-1.5 sm:mb-2 block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#d90416]'>
-								{reel.category}
-							</span>
-							<h3 className='font-display text-lg sm:text-2xl lg:text-3xl 2xl:text-4xl font-bold leading-tight text-white'>
-								{reel.title}
-							</h3>
-						</div>
-					</button>
-				)}
+					</div>
+					<div className='absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 2xl:p-10 text-left'>
+						<span className='mb-1.5 sm:mb-2 block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#d90416]'>
+							{reel.category}
+						</span>
+						<h3 className='font-display text-lg sm:text-2xl lg:text-3xl 2xl:text-4xl font-bold leading-tight text-white'>
+							{reel.title}
+						</h3>
+					</div>
+				</button>
 			</div>
 		</div>
 	)
@@ -173,35 +129,34 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 	const resolvedLocale = normalizeLocale(locale)
 	const t = TRANSLATIONS[resolvedLocale]
 
-	const reelsData = useMemo<Reel[]>(
-		() => [
-			{
-				id: 'main',
-				thumb: '/thumbnails/1.webp',
-				url: VIMEO_URL,
-				...t.reels.main,
-			},
-			{
-				id: 'drama',
-				thumb: '/thumbnails/2.webp',
-				url: VIMEO_URL,
-				...t.reels.drama,
-			},
-			{
-				id: 'action',
-				thumb: '/thumbnails/3.webp',
-				url: VIMEO_URL,
-				...t.reels.action,
-			},
-			{
-				id: 'selftape',
-				thumb: '/thumbnails/4.webp',
-				url: VIMEO_URL,
-				...t.reels.selftape,
-			},
-		],
-		[t],
-	)
+	const [activeReel, setActiveReel] = useState<Reel | null>(null)
+
+	const reelsData: Reel[] = [
+		{
+			id: 'main',
+			thumb: '/thumbnails/1.webp',
+			url: VIMEO_URL,
+			...t.reels.main,
+		},
+		{
+			id: 'drama',
+			thumb: '/thumbnails/2.webp',
+			url: VIMEO_URL,
+			...t.reels.drama,
+		},
+		{
+			id: 'action',
+			thumb: '/thumbnails/3.webp',
+			url: VIMEO_URL,
+			...t.reels.action,
+		},
+		{
+			id: 'selftape',
+			thumb: '/thumbnails/4.webp',
+			url: VIMEO_URL,
+			...t.reels.selftape,
+		},
+	]
 
 	return (
 		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
@@ -235,9 +190,40 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 
 			<div className='grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:gap-10 xl:gap-12 2xl:gap-16'>
 				{reelsData.map(reel => (
-					<ShowreelCard key={reel.id} reel={reel} />
+					<ShowreelCard key={reel.id} reel={reel} onPlay={setActiveReel} />
 				))}
 			</div>
+
+			{/* Модалка с видео — открывается по клику на play у любой карточки */}
+			{activeReel && (
+				<div
+					className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4'
+					onClick={() => setActiveReel(null)}
+				>
+					<div
+						className='relative w-full max-w-3xl 2xl:max-w-4xl'
+						onClick={e => e.stopPropagation()}
+					>
+						<button
+							type='button'
+							onClick={() => setActiveReel(null)}
+							className='absolute -top-10 right-0 flex items-center gap-2 text-white/70 hover:text-white text-xs font-mono uppercase tracking-widest cursor-pointer'
+						>
+							{t.close} <X size={16} />
+						</button>
+
+						<div className='relative aspect-video w-full bg-black rounded-sm overflow-hidden'>
+							<iframe
+								src={`${activeReel.url}&autoplay=1`}
+								title={activeReel.title}
+								className='absolute inset-0 h-full w-full'
+								allow='autoplay; fullscreen; picture-in-picture'
+								allowFullScreen
+							/>
+						</div>
+					</div>
+				</div>
+			)}
 		</section>
 	)
 }
