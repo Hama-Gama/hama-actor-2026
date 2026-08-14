@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { Play, X } from 'lucide-react'
 import { SiGoogledrive } from 'react-icons/si'
 import Image from 'next/image'
@@ -12,6 +12,41 @@ type ShowReelProps = {
 const VIMEO_URL = 'https://player.vimeo.com/video/222087977?h=f80f6ce383'
 const DRIVE_URL =
 	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
+
+// Домены, к которым реально обращается Vimeo-плеер при инициализации.
+// Дублирует статический <link rel="preconnect"> из layout.tsx (см. заметку
+// в конце файла) — этот, точечный, срабатывает только по намерению
+// пользователя навести/тапнуть на карточку главного видео, а не по таймеру
+// на весь сайт. Без crossOrigin: iframe грузится обычной навигацией без
+// CORS, так что "anonymous" соединение браузер бы просто не переиспользовал.
+const WARM_UP_ORIGINS = [
+	'https://player.vimeo.com',
+	'https://f.vimeocdn.com',
+	'https://i.vimeocdn.com',
+]
+
+// Network Information API — есть не во всех браузерах и не описана в
+// стандартных типах DOM lib.dom.d.ts, поэтому объявляем свой минимальный тип
+// и расширяем им Navigator через intersection — без хрупких ts-ignore/expect-error,
+// которые легко ломаются при форматировании кода.
+type NetworkInformation = {
+	saveData?: boolean
+	effectiveType?: string
+}
+
+function isSlowConnection(): boolean {
+	if (typeof navigator === 'undefined') return false
+	const nav = navigator as Navigator & {
+		connection?: NetworkInformation
+		mozConnection?: NetworkInformation
+		webkitConnection?: NetworkInformation
+	}
+	const conn = nav.connection || nav.mozConnection || nav.webkitConnection
+	if (!conn) return false
+	if (conn.saveData) return true
+	if (conn.effectiveType && /2g/.test(conn.effectiveType)) return true
+	return false
+}
 
 const TRANSLATIONS = {
 	en: {
@@ -73,6 +108,28 @@ type Reel = {
 	category: string
 }
 
+// Точечный прогрев соединения по намерению пользователя: hover (десктоп)
+// или touchstart (мобильные) над карточкой главного видео. Срабатывает
+// один раз, ничего не грузит на медленном/экономном соединении
+// (Data Saver, 2G) — там пользователю важнее не тратить канал впустую,
+// чем выиграть 100-300мс на открытии плеера.
+function useVimeoWarmupOnIntent() {
+	const warmedUp = useRef(false)
+
+	return useCallback(() => {
+		if (warmedUp.current) return
+		if (isSlowConnection()) return
+		warmedUp.current = true
+
+		WARM_UP_ORIGINS.forEach(origin => {
+			const link = document.createElement('link')
+			link.rel = 'preconnect'
+			link.href = origin
+			document.head.appendChild(link)
+		})
+	}, [])
+}
+
 // Карточка теперь только показывает превью + кнопку play — само видео
 // (iframe) больше не грузится внутри карточки вообще, только по клику
 // в модалке. Это заодно чинит и производительность: раньше iframe
@@ -81,9 +138,11 @@ type Reel = {
 function ShowreelCard({
 	reel,
 	onPlay,
+	onWarmup,
 }: {
 	reel: Reel
 	onPlay: (reel: Reel) => void
+	onWarmup?: () => void
 }) {
 	return (
 		<div className='group relative overflow-hidden rounded-lg sm:rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'>
@@ -93,6 +152,8 @@ function ShowreelCard({
 					aria-label={`Play ${reel.title}`}
 					className='absolute inset-0 block h-full w-full cursor-pointer'
 					onClick={() => onPlay(reel)}
+					onMouseEnter={onWarmup}
+					onTouchStart={onWarmup}
 				>
 					<Image
 						src={reel.thumb}
@@ -158,6 +219,11 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 		},
 	]
 
+	// Прогрев соединения только для главного (самого частокликаемого)
+	// видео, и только по намерению пользователя (hover/touch), а не
+	// автоматически всем подряд.
+	const warmupMainReel = useVimeoWarmupOnIntent()
+
 	return (
 		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
 		<section
@@ -190,7 +256,12 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 
 			<div className='grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 md:gap-10 xl:gap-12 2xl:gap-16'>
 				{reelsData.map(reel => (
-					<ShowreelCard key={reel.id} reel={reel} onPlay={setActiveReel} />
+					<ShowreelCard
+						key={reel.id}
+						reel={reel}
+						onPlay={setActiveReel}
+						onWarmup={reel.id === 'main' ? warmupMainReel : undefined}
+					/>
 				))}
 			</div>
 

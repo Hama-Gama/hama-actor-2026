@@ -72,6 +72,14 @@ export default async function LocaleLayout({
 			className={`${displayFont.variable} ${monoFont.variable} scroll-smooth`}
 			suppressHydrationWarning
 		>
+			<head>
+				{/* Прогрев соединения с Vimeo до того, как понадобится плеер —
+				самая ранняя точка (ещё до гидратации React), где это имеет смысл.
+				Точечный hover/touch-прогрев для главного видео — в ShowReel.tsx. */}
+				<link rel='preconnect' href='https://player.vimeo.com' />
+				<link rel='preconnect' href='https://f.vimeocdn.com' />
+				<link rel='preconnect' href='https://i.vimeocdn.com' />
+			</head>
 			<body className='bg-white text-black antialiased font-mono'>
 				<LangProvider lang={lang}>
 					<Toaster position='bottom-right' richColors />
