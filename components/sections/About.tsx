@@ -40,12 +40,12 @@ export const About = ({ locale }: { locale?: string }) => {
 					? 'Дене өлшемдері'
 					: '치수 정보',
 		sizesNote: isRu
-			? 'Примерные значения — уточняются'
+			? 'Точные замеры'
 			: isEn
-				? 'Approximate — to be confirmed'
+				? 'Verified Measurements'
 				: isKk
-					? 'Шамамен — нақтыланады'
-					: '대략적인 수치 — 추후 확정',
+					? 'Нақты өлшемдер'
+					: '확인된 치수',
 		copyHint: isRu
 			? 'Скопировать данные'
 			: isEn
@@ -71,41 +71,63 @@ export const About = ({ locale }: { locale?: string }) => {
 		data: {
 			height: {
 				label: isRu ? 'Рост' : isEn ? 'Height' : isKk ? 'Бойы' : '키',
-				val: '180 cm',
+				val: isEn ? `5'10" / 177 cm` : '177 cm',
 			},
 			weight: {
 				label: isRu ? 'Вес' : isEn ? 'Weight' : isKk ? 'Салмағы' : '몸무게',
-				val: '65 kg',
+				val: isEn ? '141 lbs / 64 kg' : '64–65 kg',
 			},
 			eyes: {
-				label: isRu ? 'Глаза' : isEn ? 'Eyes' : isKk ? 'Көз түсі' : '눈색',
-				val: isRu ? 'Зеленые' : isEn ? 'Green' : isKk ? 'Жасыл' : '초록색',
+				label: isRu ? 'Глаза' : isEn ? 'Eyes' : isKk ? 'Көз түсі' : '눈 색',
+				val: isRu ? 'Зелёные' : isEn ? 'Green' : isKk ? 'Жасыл' : '초록색',
 			},
 			hair: {
-				label: isRu ? 'Волосы' : isEn ? 'Hair' : isKk ? 'Шаш түсі' : '머리카락',
-				val: isRu ? 'Темные' : isEn ? 'Dark' : isKk ? 'Қара' : '어두운색',
+				label: isRu ? 'Волосы' : isEn ? 'Hair' : isKk ? 'Шаш түсі' : '머리색',
+				val: isRu ? 'Тёмные' : isEn ? 'Dark' : isKk ? 'Қара' : '어두운색',
 			},
 		},
 		sizes: {
 			chest: {
 				label: isRu ? 'Грудь' : isEn ? 'Chest' : isKk ? 'Кеуде' : '가슴둘레',
-				val: '92 cm',
+				val: isEn ? `36.2" / 92 cm` : '92 cm',
 			},
 			waist: {
 				label: isRu ? 'Талия' : isEn ? 'Waist' : isKk ? 'Бел' : '허리둘레',
-				val: '76 cm',
+				val: isEn ? `31.5" / 80 cm` : '80 cm',
 			},
 			hips: {
 				label: isRu ? 'Бёдра' : isEn ? 'Hips' : isKk ? 'Жамбас' : '엉덩이둘레',
-				val: '94 cm',
+				val: isEn ? `35.8" / 91 cm` : '91 cm',
 			},
-			neck: {
-				label: isRu ? 'Шея' : isEn ? 'Neck' : isKk ? 'Мойын' : '목둘레',
-				val: '38 cm',
+			shoulders: {
+				label: isRu
+					? 'Ширина плеч'
+					: isEn
+						? 'Shoulders'
+						: isKk
+							? 'Иық ені'
+							: '어깨너비',
+				val: isEn ? `15.7" / 40 cm` : '40 cm',
 			},
-			sleeve: {
-				label: isRu ? 'Рукав' : isEn ? 'Sleeve' : isKk ? 'Жең' : '소매길이',
-				val: '63 cm',
+			sleeveShoulder: {
+				label: isRu
+					? 'Рукав (от плеча)'
+					: isEn
+						? 'Sleeve (Shoulder)'
+						: isKk
+							? 'Жең (иықтан)'
+							: '소매길이 (어깨선)',
+				val: isEn ? `23.6" / 60 cm` : '60 cm',
+			},
+			sleeveNeck: {
+				label: isRu
+					? 'Рукав (от шеи, CB)'
+					: isEn
+						? 'Sleeve (Neck/CB)'
+						: isKk
+							? 'Жең (мойыннан, CB)'
+							: '소매길이 (목뒤중심, CB)',
+				val: isEn ? `29.5" / 75 cm` : '75 cm',
 			},
 			inseam: {
 				label: isRu
@@ -115,17 +137,11 @@ export const About = ({ locale }: { locale?: string }) => {
 						: isKk
 							? 'Шалбар ұзындығы (inseam)'
 							: '인심 (다리안쪽길이)',
-				val: '82 cm',
+				val: isEn ? `30.7" / 78 cm` : '78 cm',
 			},
-			jacket: {
-				label: isRu
-					? 'Пиджак'
-					: isEn
-						? 'Jacket'
-						: isKk
-							? 'Пиджак'
-							: '재킷 사이즈',
-				val: 'EU 48 / US 38',
+			neck: {
+				label: isRu ? 'Шея' : isEn ? 'Neck' : isKk ? 'Мойын' : '목둘레',
+				val: isEn ? `16.5" / 42 cm` : '42 cm',
 			},
 			hat: {
 				label: isRu
@@ -135,17 +151,7 @@ export const About = ({ locale }: { locale?: string }) => {
 						: isKk
 							? 'Бас киім'
 							: '모자 사이즈',
-				val: '57 cm',
-			},
-			shoe: {
-				label: isRu
-					? 'Обувь'
-					: isEn
-						? 'Shoe'
-						: isKk
-							? 'Аяқ киім'
-							: '신발 사이즈',
-				val: 'EU 43 / US 10 / UK 9 (275 mm)',
+				val: '67 cm',
 			},
 			reach: {
 				label: isRu
@@ -155,7 +161,7 @@ export const About = ({ locale }: { locale?: string }) => {
 						: isKk
 							? 'Қол ұзындығы (reach)'
 							: '리치 (팔길이)',
-				val: '183 cm',
+				val: isEn ? `71.2" / 181 cm` : '181 cm',
 			},
 			hand: {
 				label: isRu
@@ -175,7 +181,27 @@ export const About = ({ locale }: { locale?: string }) => {
 						: isKk
 							? 'Қолғап өлшемі'
 							: '장갑 사이즈',
-				val: 'L',
+				val: 'L / 9 (22 cm)',
+			},
+			jacket: {
+				label: isRu
+					? 'Пиджак / Костюм'
+					: isEn
+						? 'Jacket / Suit'
+						: isKk
+							? 'Пиджак / Костюм'
+							: '재킷 / 수트 사이즈',
+				val: 'EU 46 / US 36R',
+			},
+			shoe: {
+				label: isRu
+					? 'Обувь'
+					: isEn
+						? 'Shoe'
+						: isKk
+							? 'Аяқ киім'
+							: '신발 사이즈',
+				val: 'EU 42 / US 9 (270 mm)',
 			},
 		},
 		// icon — иконка навыка. videoUrl — прямая ссылка на mp4/webm (до 30 сек).
@@ -244,8 +270,43 @@ export const About = ({ locale }: { locale?: string }) => {
 	// Определяем ключ для выбора навыка
 	const skillKey = isRu ? 'ru' : isKk ? 'kk' : isKo ? 'ko' : 'en'
 
+	// Имя и контакты не выводятся в блоке About (имя уже есть в hero/шапке,
+	// контакты — в разделе Contact), но добавляются в скопированный текст,
+	// чтобы получатель в WhatsApp/Telegram сразу видел, чьи это данные и как
+	// связаться, без ручного дописывания.
+	// TODO: замени плейсхолдеры на реальные номер и email.
+	const actorName = 'Khamit Arkayev (Hama)'
+	const roleLabel = isRu
+		? 'Актёр / каскадёр'
+		: isEn
+			? 'Actor / Stunt Performer'
+			: isKk
+				? 'Актёр / каскадёр'
+				: '배우 / 스턴트 퍼포머'
+	const contact = {
+		whatsapp: '+7 707 891 91 81',
+		email: 'ardager121@mail.ru', 
+		website: 'hama-actor.com',
+	}
+	const contactLabels = {
+		whatsapp: isRu
+			? 'WhatsApp'
+			: isEn
+				? 'WhatsApp'
+				: isKk
+					? 'WhatsApp'
+					: '왓츠앱',
+		email: isRu ? 'Email' : isEn ? 'Email' : isKk ? 'Email' : '이메일',
+		website: isRu ? 'Сайт' : isEn ? 'Website' : isKk ? 'Сайт' : '웹사이트',
+	}
+
 	const handleCopy = async () => {
 		const lines = [
+			`${actorName} — ${roleLabel}`,
+			`${contactLabels.whatsapp}: ${contact.whatsapp}`,
+			`${contactLabels.email}: ${contact.email}`,
+			`${contactLabels.website}: ${contact.website}`,
+			'',
 			...Object.values(t.data).map(item => `${item.label}: ${item.val}`),
 			...Object.values(t.sizes).map(item => `${item.label}: ${item.val}`),
 		]

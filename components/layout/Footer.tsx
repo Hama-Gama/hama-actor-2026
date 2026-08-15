@@ -8,30 +8,36 @@ interface FooterProps {
 
 const FOOTER_TRANSLATIONS = {
 	en: {
-		name: 'Khamit Arkayev',
+		firstName: 'Khamit',
+		lastName: 'Arkayev',
 		rights: 'All rights reserved',
 		developed: 'Developed by Hama',
 		role: 'Actor // Martial Artist',
 	},
 	ru: {
-		name: 'Хамит Аркаев',
+		firstName: 'Хамит',
+		lastName: 'Аркаев',
 		rights: 'Все права защищены',
 		developed: 'Разработано Hama',
 		role: 'Актёр // Боевые искусства',
 	},
 	kk: {
-		name: 'Хамит Арқаев',
+		firstName: 'Хамит',
+		lastName: 'Арқаев',
 		rights: 'Барлық құқықтар қорғалған',
 		developed: 'Hama әзірлеген',
 		role: 'Актёр // Жекпе-жек өнері',
 	},
 	ko: {
-		name: '카미트 아르카예프',
+		firstName: '카미트',
+		lastName: '아르카예프',
 		rights: '모든 권리 보유',
 		developed: 'Hama 제작',
 		role: '배우 // 무술가',
 	},
 }
+
+const SITE_URL = 'hama-actor.com'
 
 export default function Footer({ lang }: FooterProps) {
 	const activeLang = (
@@ -43,31 +49,23 @@ export default function Footer({ lang }: FooterProps) {
 		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
 		// Структура flex (flex-col md:flex-row) не меняется — только отступы/паддинги.
 		<footer className='bg-black text-white pt-8 sm:pt-10 lg:pt-12 pb-8 sm:pb-10 lg:pb-12 mt-16 sm:mt-20 lg:mt-24 overflow-hidden w-full'>
-			{/* СЕКЦИЯ С ИМЕНЕМ: адаптивный SVG-текст.
-			    Важный момент: fontSize внутри SVG уже АВТОМАТИЧЕСКИ адаптивен —
-			    viewBox + preserveAspectRatio + className="w-full h-auto" заставляют
-			    браузер масштабировать весь SVG (а значит и текст внутри) вместе с
-			    шириной контейнера. Поэтому здесь не нужны Tailwind sm:/md:/lg: —
-			    это уже "резиновый" текст без медиа-запросов, трогать fontSize не надо. */}
-			<div className='w-full border-b border-white/10 mb-8 sm:mb-10 lg:mb-12 select-none px-4 sm:px-6 lg:px-8 2xl:px-12'>
-				<svg
-					viewBox='0 0 1000 100'
-					className='w-full h-auto'
-					preserveAspectRatio='xMidYMid meet'
-				>
-					<text
-						x='50%'
-						y='60%'
-						textAnchor='middle'
-						className='font-display font-black uppercase fill-white hover:fill-[#d90416] transition-colors duration-500'
-						style={{
-							fontSize: '75px',
-							letterSpacing: '0.02em',
-						}}
-					>
-						{content.name}
-					</text>
-				</svg>
+			{/* СЕКЦИЯ С ИМЕНЕМ: две строки, всегда прижаты влево (нет центрирования,
+			    нет SVG-скейлинга — имя короткое, обычный Tailwind text-* с брейкпоинтами
+			    справляется без переполнения). Имя — тёмно-серое и жирное (не белое,
+			    чтобы не спорило с фоном и с site-ссылкой ниже). Ссылка на сайт —
+			    маленький тёмно-красный, полупрозрачный текст, почти незаметный. */}
+			<div className='w-full border-b border-white/10 mb-8 sm:mb-10 lg:mb-12 select-none px-4 sm:px-6 lg:px-8 2xl:px-12 pb-6 sm:pb-8'>
+				<div className='text-left'>
+					<p className='font-display font-black uppercase leading-[0.95] text-neutral-500 text-4xl sm:text-6xl lg:text-7xl 2xl:text-8xl tracking-tight'>
+						{content.firstName}
+					</p>
+					<p className='font-display font-black uppercase leading-[0.95] text-neutral-500 text-4xl sm:text-6xl lg:text-7xl 2xl:text-8xl tracking-tight'>
+						{content.lastName}
+					</p>
+					<p className='mt-2 sm:mt-3 font-mono text-[9px] sm:text-[10px] tracking-[0.25em] text-[#d90416]/30'>
+						{SITE_URL}
+					</p>
+				</div>
 			</div>
 
 			{/* НИЖНЯЯ ТЕХНИЧЕСКАЯ ЧАСТЬ */}
