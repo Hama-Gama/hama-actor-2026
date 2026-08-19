@@ -14,6 +14,36 @@ import {
 	X,
 	Copy,
 } from 'lucide-react'
+import {
+	ACTOR_NAME,
+	ACTOR_CONTACT,
+	BODY_MEASUREMENTS,
+	CLOTHING_MEASUREMENTS,
+	FIXED_SIZES,
+	SKILLS,
+	type SkillIconId,
+} from '@/lib/about-config'
+
+// Сопоставление iconId (из конфига) → компонент иконки lucide-react.
+// Добавляешь навык с новой иконкой в about-config.ts — один раз добавь её
+// сюда, дальше просто ссылаешься на iconId.
+const ICON_MAP: Record<SkillIconId, React.ElementType> = {
+	taekwondo: Footprints,
+	boxing: HandFist,
+	mma: Swords,
+	weapon: Target,
+	cardistry: Spade,
+	skydiving: WindArrowDown,
+	motorcycling: Motorbike,
+}
+
+// Форматирование замера: en показывает imperial + metric, остальные — только
+// metric. Меняешь порядок/формат тут в одном месте — единообразно для всех
+// параметров и размеров.
+const formatMeasurement = (
+	m: { metric: string; imperial: string },
+	isEn: boolean,
+) => (isEn ? `${m.imperial} / ${m.metric}` : m.metric)
 
 export const About = ({ locale }: { locale?: string }) => {
 	const isRu = locale === 'ru'
@@ -68,214 +98,156 @@ export const About = ({ locale }: { locale?: string }) => {
 					? 'Көшіру мүмкін болмады'
 					: '복사하지 못했습니다',
 		closeVideo: isRu ? 'Закрыть' : isEn ? 'Close' : isKk ? 'Жабу' : '닫기',
-		data: {
-			height: {
-				label: isRu ? 'Рост' : isEn ? 'Height' : isKk ? 'Бойы' : '키',
-				val: isEn ? `5'10" / 177 cm` : '177 cm',
-			},
-			weight: {
-				label: isRu ? 'Вес' : isEn ? 'Weight' : isKk ? 'Салмағы' : '몸무게',
-				val: isEn ? '141 lbs / 64 kg' : '64–65 kg',
-			},
-			eyes: {
-				label: isRu ? 'Глаза' : isEn ? 'Eyes' : isKk ? 'Көз түсі' : '눈 색',
-				val: isRu ? 'Зелёные' : isEn ? 'Green' : isKk ? 'Жасыл' : '초록색',
-			},
-			hair: {
-				label: isRu ? 'Волосы' : isEn ? 'Hair' : isKk ? 'Шаш түсі' : '머리색',
-				val: isRu ? 'Тёмные' : isEn ? 'Dark' : isKk ? 'Қара' : '어두운색',
-			},
-		},
-		sizes: {
-			chest: {
-				label: isRu ? 'Грудь' : isEn ? 'Chest' : isKk ? 'Кеуде' : '가슴둘레',
-				val: isEn ? `36.2" / 92 cm` : '92 cm',
-			},
-			waist: {
-				label: isRu ? 'Талия' : isEn ? 'Waist' : isKk ? 'Бел' : '허리둘레',
-				val: isEn ? `31.5" / 80 cm` : '80 cm',
-			},
-			hips: {
-				label: isRu ? 'Бёдра' : isEn ? 'Hips' : isKk ? 'Жамбас' : '엉덩이둘레',
-				val: isEn ? `35.8" / 91 cm` : '91 cm',
-			},
-			shoulders: {
-				label: isRu
-					? 'Ширина плеч'
-					: isEn
-						? 'Shoulders'
-						: isKk
-							? 'Иық ені'
-							: '어깨너비',
-				val: isEn ? `15.7" / 40 cm` : '40 cm',
-			},
-			sleeveShoulder: {
-				label: isRu
-					? 'Рукав (от плеча)'
-					: isEn
-						? 'Sleeve (Shoulder)'
-						: isKk
-							? 'Жең (иықтан)'
-							: '소매길이 (어깨선)',
-				val: isEn ? `23.6" / 60 cm` : '60 cm',
-			},
-			sleeveNeck: {
-				label: isRu
-					? 'Рукав (от шеи, CB)'
-					: isEn
-						? 'Sleeve (Neck/CB)'
-						: isKk
-							? 'Жең (мойыннан, CB)'
-							: '소매길이 (목뒤중심, CB)',
-				val: isEn ? `29.5" / 75 cm` : '75 cm',
-			},
-			inseam: {
-				label: isRu
-					? 'Шаг (inseam)'
-					: isEn
-						? 'Inseam'
-						: isKk
-							? 'Шалбар ұзындығы (inseam)'
-							: '인심 (다리안쪽길이)',
-				val: isEn ? `30.7" / 78 cm` : '78 cm',
-			},
-			neck: {
-				label: isRu ? 'Шея' : isEn ? 'Neck' : isKk ? 'Мойын' : '목둘레',
-				val: isEn ? `16.5" / 42 cm` : '42 cm',
-			},
-			hat: {
-				label: isRu
-					? 'Головной убор'
-					: isEn
-						? 'Hat'
-						: isKk
-							? 'Бас киім'
-							: '모자 사이즈',
-				val: '67 cm',
-			},
-			reach: {
-				label: isRu
-					? 'Размах рук (reach)'
-					: isEn
-						? 'Reach'
-						: isKk
-							? 'Қол ұзындығы (reach)'
-							: '리치 (팔길이)',
-				val: isEn ? `71.2" / 181 cm` : '181 cm',
-			},
-			hand: {
-				label: isRu
-					? 'Ведущая рука'
-					: isEn
-						? 'Dominant Hand'
-						: isKk
-							? 'Жетекші қол'
-							: '주로 사용하는 손',
-				val: isRu ? 'Правая' : isEn ? 'Right' : isKk ? 'Оң қол' : '오른손',
-			},
-			glove: {
-				label: isRu
-					? 'Перчатки'
-					: isEn
-						? 'Glove Size'
-						: isKk
-							? 'Қолғап өлшемі'
-							: '장갑 사이즈',
-				val: 'L / 9 (22 cm)',
-			},
-			jacket: {
-				label: isRu
-					? 'Пиджак / Костюм'
-					: isEn
-						? 'Jacket / Suit'
-						: isKk
-							? 'Пиджак / Костюм'
-							: '재킷 / 수트 사이즈',
-				val: 'EU 46 / US 36R',
-			},
-			shoe: {
-				label: isRu
-					? 'Обувь'
-					: isEn
-						? 'Shoe'
-						: isKk
-							? 'Аяқ киім'
-							: '신발 사이즈',
-				val: 'EU 42 / US 9 (270 mm)',
-			},
-		},
-		// icon — иконка навыка. videoUrl — прямая ссылка на mp4/webm (до 30 сек).
-		// Пусто = кнопка "смотреть" не показывается.
-		// TODO: положи файлы с такими именами в public/videos/
-		skillList: [
-			{
-				en: 'Taekwondo',
-				ru: 'Таэквондо',
-				kk: 'Таэквондо',
-				ko: '태권도',
-				icon: Footprints,
-				videoUrl: '/videos/taekwondo.mp4',
-			},
-			{
-				en: 'Boxing',
-				ru: 'Бокс',
-				kk: 'Бокс',
-				ko: '복싱',
-				icon: HandFist,
-				videoUrl: '/videos/boxing.mp4',
-			},
-			{
-				en: 'MMA',
-				ru: 'ММА',
-				kk: 'ММА',
-				ko: 'MMA',
-				icon: Swords,
-				videoUrl: '/videos/mma.mp4',
-			},
-			{
-				en: 'Weapon Handling',
-				ru: 'Оружие',
-				kk: 'Қару қолдану',
-				ko: '무기 취급',
-				icon: Target,
-				videoUrl: '/videos/weapon-handling.mp4',
-			},
-			{
-				en: 'Cardistry',
-				ru: 'Кардистри',
-				kk: 'Кардистри',
-				ko: '카디스트리',
-				icon: Spade,
-				videoUrl: '/videos/cardistry.mp4',
-			},
-			{
-				en: 'Skydiving',
-				ru: 'Парашют',
-				kk: 'Парашютпен секіру',
-				ko: '스카이다이빙',
-				icon: WindArrowDown,
-				videoUrl: '/videos/skydiving.mp4',
-			},
-			{
-				en: 'Motorcycling',
-				ru: 'Мотоцикл',
-				kk: 'Мотоцикл айдау',
-				ko: '모터사이클',
-				icon: Motorbike,
-				videoUrl: '/videos/motorcycling.mp4',
-			},
-		],
+		// Цвет глаз/волос и ведущая рука — переводимые слова, не цифры,
+		// поэтому остаются здесь, а не в about-config.ts.
+		eyes: isRu ? 'Зелёные' : isEn ? 'Green' : isKk ? 'Жасыл' : '초록색',
+		hair: isRu ? 'Тёмные' : isEn ? 'Dark' : isKk ? 'Қара' : '어두운색',
+		hand: isRu ? 'Правая' : isEn ? 'Right' : isKk ? 'Оң қол' : '오른손',
 	}
 
-	// Определяем ключ для выбора навыка
+	const dataLabels = {
+		height: isRu ? 'Рост' : isEn ? 'Height' : isKk ? 'Бойы' : '키',
+		weight: isRu ? 'Вес' : isEn ? 'Weight' : isKk ? 'Салмағы' : '몸무게',
+		eyes: isRu ? 'Глаза' : isEn ? 'Eyes' : isKk ? 'Көз түсі' : '눈 색',
+		hair: isRu ? 'Волосы' : isEn ? 'Hair' : isKk ? 'Шаш түсі' : '머리색',
+	}
+
+	// Значения params — height/weight из конфига (форматируются), eyes/hair —
+	// переводные слова выше.
+	const dataItems = [
+		{
+			label: dataLabels.height,
+			val: formatMeasurement(BODY_MEASUREMENTS.height, isEn),
+		},
+		{
+			label: dataLabels.weight,
+			val: formatMeasurement(BODY_MEASUREMENTS.weight, isEn),
+		},
+		{ label: dataLabels.eyes, val: t.eyes },
+		{ label: dataLabels.hair, val: t.hair },
+	]
+
+	const sizeLabels = {
+		chest: isRu ? 'Грудь' : isEn ? 'Chest' : isKk ? 'Кеуде' : '가슴둘레',
+		waist: isRu ? 'Талия' : isEn ? 'Waist' : isKk ? 'Бел' : '허리둘레',
+		hips: isRu ? 'Бёдра' : isEn ? 'Hips' : isKk ? 'Жамбас' : '엉덩이둘레',
+		shoulders: isRu
+			? 'Ширина плеч'
+			: isEn
+				? 'Shoulders'
+				: isKk
+					? 'Иық ені'
+					: '어깨너비',
+		sleeveShoulder: isRu
+			? 'Рукав (от плеча)'
+			: isEn
+				? 'Sleeve (Shoulder)'
+				: isKk
+					? 'Жең (иықтан)'
+					: '소매길이 (어깨선)',
+		sleeveNeck: isRu
+			? 'Рукав (от шеи, CB)'
+			: isEn
+				? 'Sleeve (Neck/CB)'
+				: isKk
+					? 'Жең (мойыннан, CB)'
+					: '소매길이 (목뒤중심, CB)',
+		inseam: isRu
+			? 'Шаг (inseam)'
+			: isEn
+				? 'Inseam'
+				: isKk
+					? 'Шалбар ұзындығы (inseam)'
+					: '인심 (다리안쪽길이)',
+		neck: isRu ? 'Шея' : isEn ? 'Neck' : isKk ? 'Мойын' : '목둘레',
+		hat: isRu
+			? 'Головной убор'
+			: isEn
+				? 'Hat'
+				: isKk
+					? 'Бас киім'
+					: '모자 사이즈',
+		reach: isRu
+			? 'Размах рук (reach)'
+			: isEn
+				? 'Reach'
+				: isKk
+					? 'Қол ұзындығы (reach)'
+					: '리치 (팔길이)',
+		hand: isRu
+			? 'Ведущая рука'
+			: isEn
+				? 'Dominant Hand'
+				: isKk
+					? 'Жетекші қол'
+					: '주로 사용하는 손',
+		glove: isRu
+			? 'Перчатки'
+			: isEn
+				? 'Glove Size'
+				: isKk
+					? 'Қолғап өлшемі'
+					: '장갑 사이즈',
+		jacket: isRu
+			? 'Пиджак / Костюм'
+			: isEn
+				? 'Jacket / Suit'
+				: isKk
+					? 'Пиджак / Костюм'
+					: '재킷 / 수트 사이즈',
+		shoe: isRu ? 'Обувь' : isEn ? 'Shoe' : isKk ? 'Аяқ киім' : '신발 사이즈',
+	}
+
+	// Размеры одежды из CLOTHING_MEASUREMENTS (форматируются) + FIXED_SIZES
+	// (уже готовая строка) + hand (переводное слово). Порядок в массиве =
+	// порядок отображения.
+	const sizeItems = [
+		{
+			label: sizeLabels.chest,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.chest, isEn),
+		},
+		{
+			label: sizeLabels.waist,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.waist, isEn),
+		},
+		{
+			label: sizeLabels.hips,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.hips, isEn),
+		},
+		{
+			label: sizeLabels.shoulders,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.shoulders, isEn),
+		},
+		{
+			label: sizeLabels.sleeveShoulder,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.sleeveShoulder, isEn),
+		},
+		{
+			label: sizeLabels.sleeveNeck,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.sleeveNeck, isEn),
+		},
+		{
+			label: sizeLabels.inseam,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.inseam, isEn),
+		},
+		{
+			label: sizeLabels.neck,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.neck, isEn),
+		},
+		{ label: sizeLabels.hat, val: FIXED_SIZES.hat },
+		{
+			label: sizeLabels.reach,
+			val: formatMeasurement(CLOTHING_MEASUREMENTS.reach, isEn),
+		},
+		{ label: sizeLabels.hand, val: t.hand },
+		{ label: sizeLabels.glove, val: FIXED_SIZES.glove },
+		{ label: sizeLabels.jacket, val: FIXED_SIZES.jacket },
+		{ label: sizeLabels.shoe, val: FIXED_SIZES.shoe },
+	]
+
+	// Определяем ключ для перевода названия навыка
 	const skillKey = isRu ? 'ru' : isKk ? 'kk' : isKo ? 'ko' : 'en'
 
-	// Имя и контакты не выводятся в блоке About (имя уже есть в hero/шапке,
-	// контакты — в разделе Contact), но добавляются в скопированный текст,
-	// чтобы получатель в WhatsApp/Telegram сразу видел, чьи это данные и как
-	// связаться, без ручного дописывания.
-	// TODO: замени плейсхолдеры на реальные номер и email.
-	const actorName = 'Khamit Arkayev (Hama)'
 	const roleLabel = isRu
 		? 'Актёр / каскадёр'
 		: isEn
@@ -283,32 +255,22 @@ export const About = ({ locale }: { locale?: string }) => {
 			: isKk
 				? 'Актёр / каскадёр'
 				: '배우 / 스턴트 퍼포머'
-	const contact = {
-		whatsapp: '+7 707 891 91 81',
-		email: 'ardager121@mail.ru', 
-		website: 'hama-actor.com',
-	}
+
 	const contactLabels = {
-		whatsapp: isRu
-			? 'WhatsApp'
-			: isEn
-				? 'WhatsApp'
-				: isKk
-					? 'WhatsApp'
-					: '왓츠앱',
-		email: isRu ? 'Email' : isEn ? 'Email' : isKk ? 'Email' : '이메일',
+		whatsapp: 'WhatsApp',
+		email: 'Email',
 		website: isRu ? 'Сайт' : isEn ? 'Website' : isKk ? 'Сайт' : '웹사이트',
 	}
 
 	const handleCopy = async () => {
 		const lines = [
-			`${actorName} — ${roleLabel}`,
-			`${contactLabels.whatsapp}: ${contact.whatsapp}`,
-			`${contactLabels.email}: ${contact.email}`,
-			`${contactLabels.website}: ${contact.website}`,
+			`${ACTOR_NAME} — ${roleLabel}`,
+			`${contactLabels.whatsapp}: ${ACTOR_CONTACT.whatsapp}`,
+			`${contactLabels.email}: ${ACTOR_CONTACT.email}`,
+			`${contactLabels.website}: ${ACTOR_CONTACT.website}`,
 			'',
-			...Object.values(t.data).map(item => `${item.label}: ${item.val}`),
-			...Object.values(t.sizes).map(item => `${item.label}: ${item.val}`),
+			...dataItems.map(item => `${item.label}: ${item.val}`),
+			...sizeItems.map(item => `${item.label}: ${item.val}`),
 		]
 		const text = lines.join('\n')
 
@@ -349,7 +311,7 @@ export const About = ({ locale }: { locale?: string }) => {
 					</div>
 
 					<div className='max-w-md space-y-3 sm:space-y-4 border-t border-neutral-100 pt-2'>
-						{Object.values(t.data).map((item, i) => (
+						{dataItems.map((item, i) => (
 							<div
 								key={i}
 								className='flex justify-between items-end border-b border-neutral-50 pb-2'
@@ -374,8 +336,8 @@ export const About = ({ locale }: { locale?: string }) => {
 						// {t.skillsHeading}
 					</h3>
 					<div className='grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 sm:gap-y-3 gap-x-2.5 sm:gap-x-3 2xl:gap-y-4 2xl:gap-x-4'>
-						{t.skillList.map((skill, i) => {
-							const Icon = skill.icon
+						{SKILLS.map(skill => {
+							const Icon = ICON_MAP[skill.iconId]
 							const content = (
 								<>
 									<Icon size={16} className='order-1 text-[#d90416] shrink-0' />
@@ -385,7 +347,7 @@ export const About = ({ locale }: { locale?: string }) => {
 										</span>
 									)}
 									<span className='order-3 sm:order-2 font-sans uppercase text-sm 2xl:text-base font-bold tracking-tight opacity-90 flex-1 text-left'>
-										{skill[skillKey]}
+										{skill.name[skillKey]}
 									</span>
 								</>
 							)
@@ -397,9 +359,9 @@ export const About = ({ locale }: { locale?: string }) => {
 							// От sm и выше: иконка → название → play-кнопка (как было).
 							return skill.videoUrl ? (
 								<button
-									key={i}
+									key={skill.id}
 									type='button'
-									onClick={() => setActiveVideo(skill.videoUrl)}
+									onClick={() => setActiveVideo(skill.videoUrl!)}
 									className='flex items-center gap-2.5 py-2.5 px-3 2xl:py-3 2xl:px-3.5 rounded-sm border border-white/20 hover:border-[#d90416]/50 hover:bg-white/5 active:bg-white/10 transition-colors cursor-pointer text-left'
 								>
 									{content}
@@ -407,7 +369,7 @@ export const About = ({ locale }: { locale?: string }) => {
 							) : (
 								<div
 									className='flex items-center gap-2.5 py-2.5 px-3 2xl:py-3 2xl:px-3.5 rounded-sm border border-white/20'
-									key={i}
+									key={skill.id}
 								>
 									{content}
 								</div>
@@ -429,7 +391,7 @@ export const About = ({ locale }: { locale?: string }) => {
 				</div>
 
 				<div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-5 sm:gap-x-6 2xl:gap-x-8 gap-y-4 sm:gap-y-5 2xl:gap-y-6'>
-					{Object.values(t.sizes).map((item, i) => (
+					{sizeItems.map((item, i) => (
 						<div key={i} className='flex flex-col gap-1'>
 							<span className='font-mono text-[9px] 2xl:text-[10px] uppercase text-neutral-400 tracking-widest'>
 								{item.label}

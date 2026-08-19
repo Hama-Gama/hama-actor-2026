@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { ChevronDown } from 'lucide-react'
 import {
 	getContactSchema,
+	CONTACT_FIELD_LIMITS,
 	type ContactFormValues,
 } from '@/lib/validations/contact'
 
@@ -16,6 +18,7 @@ const initialValues: ContactFormValues = {
 	projectRole: '',
 	deadline: '',
 	preferredContact: 'telegram',
+	otherMethodLabel: '',
 	contactValue: '',
 	message: '',
 	company: '',
@@ -27,10 +30,24 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 		Partial<Record<keyof ContactFormValues, string>>
 	>({})
 	const [submitting, setSubmitting] = useState(false)
+	const [methodOpen, setMethodOpen] = useState(false)
+	const methodRef = useRef<HTMLDivElement>(null)
 
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
 	const isKk = locale === 'kk' || locale === 'kz'
+
+	// закрыть кастомный dropdown по клику вне его — тот же паттерн, что и
+	// языковой переключатель в Header.tsx
+	useEffect(() => {
+		const onClickOutside = (e: MouseEvent) => {
+			if (methodRef.current && !methodRef.current.contains(e.target as Node)) {
+				setMethodOpen(false)
+			}
+		}
+		document.addEventListener('mousedown', onClickOutside)
+		return () => document.removeEventListener('mousedown', onClickOutside)
+	}, [])
 
 	const t = {
 		name: isRu
@@ -47,7 +64,13 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 				: isKk
 					? 'Жоба және рөл'
 					: '프로젝트 및 배역',
-		deadline: isRu ? 'Дедлайн' : isEn ? 'Deadline' : isKk ? 'Мерзім' : '마감일',
+		deadline: isRu
+			? 'Дедлайн (необязательно)'
+			: isEn
+				? 'Deadline (optional)'
+				: isKk
+					? 'Мерзім (міндетті емес)'
+					: '마감일 (선택 사항)',
 		deadlineHint: isRu
 			? 'например: ASAP, март 2027'
 			: isEn
@@ -62,6 +85,13 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 				: isKk
 					? 'Жауап алу тәсілі'
 					: '답장 받을 방법',
+		otherMethodLabel: isRu
+			? 'Уточните способ связи'
+			: isEn
+				? 'Please specify'
+				: isKk
+					? 'Нақтылаңыз'
+					: '구체적으로 입력해 주세요',
 		contactValue: isRu
 			? 'Контакт (email / номер / ник)'
 			: isEn
@@ -100,6 +130,8 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					: '메시지를 보내지 못했습니다. 다시 시도하거나 Telegram/WhatsApp으로 직접 연락해 주세요.',
 	}
 
+	// Способ связи — Telegram/WhatsApp/WeChat/KakaoTalk/Email это имена
+	// собственные, не переводятся. "Phone Call" и "Other" — переведены.
 	const contactOptions: {
 		value: ContactFormValues['preferredContact']
 		label: string
@@ -107,12 +139,36 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 		{ value: 'telegram', label: 'Telegram' },
 		{ value: 'whatsapp', label: 'WhatsApp' },
 		{ value: 'wechat', label: 'WeChat' },
+		{ value: 'kakaotalk', label: 'KakaoTalk' },
+		{
+			value: 'phone',
+			label: isRu
+				? 'Звонок'
+				: isEn
+					? 'Phone Call'
+					: isKk
+						? 'Қоңырау'
+						: '전화 통화',
+		},
 		{ value: 'email', label: 'Email' },
+		{
+			value: 'other',
+			label: isRu ? 'Другое' : isEn ? 'Other' : isKk ? 'Басқа' : '기타',
+		},
 	]
+
+	const selectedOption =
+		contactOptions.find(opt => opt.value === values.preferredContact) ??
+		contactOptions[0]
 
 	const handleChange = (field: keyof ContactFormValues, value: string) => {
 		setValues(prev => ({ ...prev, [field]: value }))
 		if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }))
+	}
+
+	const handleSelectMethod = (value: ContactFormValues['preferredContact']) => {
+		handleChange('preferredContact', value)
+		setMethodOpen(false)
 	}
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -191,6 +247,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 						type='text'
 						value={values.name}
 						onChange={e => handleChange('name', e.target.value)}
+						maxLength={CONTACT_FIELD_LIMITS.name}
 						className={inputClass}
 					/>
 					{errors.name && <p className={errorClass}>{errors.name}</p>}
@@ -203,6 +260,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 						value={values.deadline}
 						onChange={e => handleChange('deadline', e.target.value)}
 						placeholder={t.deadlineHint}
+						maxLength={CONTACT_FIELD_LIMITS.deadline}
 						className={inputClass}
 					/>
 				</div>
@@ -214,6 +272,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 					type='text'
 					value={values.projectRole}
 					onChange={e => handleChange('projectRole', e.target.value)}
+					maxLength={CONTACT_FIELD_LIMITS.projectRole}
 					className={inputClass}
 				/>
 				{errors.projectRole && (
@@ -222,19 +281,45 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 			</div>
 
 			<div className='grid md:grid-cols-2 gap-4 sm:gap-6 2xl:gap-8 mb-4 sm:mb-6'>
-				<div>
+				{/* Кастомный dropdown вместо нативного <select> — нативный select
+				    рендерится браузером системными стилями (синяя подсветка,
+				    дефолтный шрифт) и выбивается из чёрно-красно-белого стиля
+				    сайта. Тот же паттерн уже используется в языковом переключателе
+				    в Header.tsx. */}
+				<div className='relative' ref={methodRef}>
 					<label className={labelClass}>{t.preferredContact}</label>
-					<select
-						value={values.preferredContact}
-						onChange={e => handleChange('preferredContact', e.target.value)}
-						className={inputClass}
+					<button
+						type='button'
+						onClick={() => setMethodOpen(v => !v)}
+						className={`${inputClass} flex items-center justify-between text-left cursor-pointer`}
 					>
-						{contactOptions.map(opt => (
-							<option key={opt.value} value={opt.value}>
-								{opt.label}
-							</option>
-						))}
-					</select>
+						<span>{selectedOption.label}</span>
+						<ChevronDown
+							size={15}
+							className={`text-neutral-400 transition-transform shrink-0 ${
+								methodOpen ? 'rotate-180' : ''
+							}`}
+						/>
+					</button>
+
+					{methodOpen && (
+						<div className='absolute left-0 right-0 top-full mt-1 z-10 bg-white border border-neutral-200 rounded-sm shadow-lg overflow-hidden max-h-56 overflow-y-auto'>
+							{contactOptions.map(opt => (
+								<button
+									key={opt.value}
+									type='button'
+									onClick={() => handleSelectMethod(opt.value)}
+									className={`w-full text-left px-3.5 sm:px-4 py-2.5 text-sm hover:bg-neutral-50 transition-colors ${
+										opt.value === values.preferredContact
+											? 'text-[#d90416] font-bold'
+											: 'text-black'
+									}`}
+								>
+									{opt.label}
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 
 				<div>
@@ -243,6 +328,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 						type='text'
 						value={values.contactValue}
 						onChange={e => handleChange('contactValue', e.target.value)}
+						maxLength={CONTACT_FIELD_LIMITS.contactValue}
 						className={inputClass}
 					/>
 					{errors.contactValue && (
@@ -251,12 +337,32 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 				</div>
 			</div>
 
+			{/* Появляется только если выбрано "Other" */}
+			{values.preferredContact === 'other' && (
+				<div className='mb-4 sm:mb-6'>
+					<label className={labelClass}>{t.otherMethodLabel}</label>
+					<input
+						type='text'
+						value={values.otherMethodLabel}
+						onChange={e => handleChange('otherMethodLabel', e.target.value)}
+						maxLength={CONTACT_FIELD_LIMITS.otherMethodLabel}
+						className={inputClass}
+					/>
+				</div>
+			)}
+
 			<div className='mb-6 sm:mb-8'>
-				<label className={labelClass}>{t.message}</label>
+				<div className='flex items-baseline justify-between'>
+					<label className={labelClass}>{t.message}</label>
+					<span className='font-mono text-[9px] text-neutral-300 mb-1.5'>
+						{values.message?.length ?? 0}/{CONTACT_FIELD_LIMITS.message}
+					</span>
+				</div>
 				<textarea
 					value={values.message}
 					onChange={e => handleChange('message', e.target.value)}
 					rows={4}
+					maxLength={CONTACT_FIELD_LIMITS.message}
 					className={inputClass}
 				/>
 			</div>

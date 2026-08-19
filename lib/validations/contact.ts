@@ -37,27 +37,88 @@ const errorMessages = (locale?: string) => {
 				: isKk
 					? 'Жауап беру үшін байланыс мәліметін көрсетіңіз'
 					: '답장을 받을 연락처를 입력해 주세요',
+		tooLong: (max: number) =>
+			isRu
+				? `Слишком длинно — максимум ${max} символов`
+				: isEn
+					? `Too long — ${max} characters max`
+					: isKk
+						? `Тым ұзын — ең көбі ${max} таңба`
+						: `너무 깁니다 — 최대 ${max}자`,
 	}
 }
+
+// Лимиты вынесены отдельно, чтобы ContactForm.tsx мог использовать те же
+// цифры для maxLength на инпутах и счётчика символов у Message — одно
+// число, один источник истины для клиента и сервера.
+export const CONTACT_FIELD_LIMITS = {
+	name: 100,
+	projectRole: 200,
+	deadline: 50,
+	otherMethodLabel: 60,
+	contactValue: 150,
+	message: 2000,
+} as const
 
 export const getContactSchema = (locale?: string) => {
 	const errors = errorMessages(locale)
 
 	return z.object({
-		name: z.string().trim().min(2, { message: errors.nameRequired }),
+		name: z
+			.string()
+			.trim()
+			.min(2, { message: errors.nameRequired })
+			.max(CONTACT_FIELD_LIMITS.name, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.name),
+			}),
 		projectRole: z
 			.string()
 			.trim()
-			.min(2, { message: errors.projectRequired }),
-		deadline: z.string().trim().optional(),
-		preferredContact: z.enum(['email', 'whatsapp', 'telegram', 'wechat'], {
-			message: errors.contactMethodRequired,
-		}),
+			.min(2, { message: errors.projectRequired })
+			.max(CONTACT_FIELD_LIMITS.projectRole, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.projectRole),
+			}),
+		deadline: z
+			.string()
+			.trim()
+			.max(CONTACT_FIELD_LIMITS.deadline, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.deadline),
+			})
+			.optional(),
+		preferredContact: z.enum(
+			[
+				'telegram',
+				'whatsapp',
+				'wechat',
+				'kakaotalk',
+				'phone',
+				'email',
+				'other',
+			],
+			{ message: errors.contactMethodRequired },
+		),
+		// Заполняется только когда preferredContact === 'other'
+		otherMethodLabel: z
+			.string()
+			.trim()
+			.max(CONTACT_FIELD_LIMITS.otherMethodLabel, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.otherMethodLabel),
+			})
+			.optional(),
 		contactValue: z
 			.string()
 			.trim()
-			.min(3, { message: errors.contactValueRequired }),
-		message: z.string().trim().optional(),
+			.min(3, { message: errors.contactValueRequired })
+			.max(CONTACT_FIELD_LIMITS.contactValue, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.contactValue),
+			}),
+		message: z
+			.string()
+			.trim()
+			.max(CONTACT_FIELD_LIMITS.message, {
+				message: errors.tooLong(CONTACT_FIELD_LIMITS.message),
+			})
+			.optional(),
 		// honeypot — реальные пользователи это поле не видят и не заполняют
 		company: z.string().max(0).optional(),
 	})
