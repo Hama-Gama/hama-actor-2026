@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
-import { LuShare2 } from 'react-icons/lu'
 import { Menu, X } from 'lucide-react'
-import { toast } from 'sonner'
+import { resolveLocale } from '@/lib/locales'
 import LanguageSwitcher from './LanguageSwitcher'
+import ShareModal from './ShareModal'
 
 const NAV = [
 	{ href: '#about', ru: 'О себе', en: 'About', kk: 'Мен туралы', ko: '소개' },
@@ -42,8 +42,7 @@ const NAV = [
 
 export default function Header() {
 	const params = useParams()
-	const rawLang = (params?.lang as string) || 'en'
-	const lang = rawLang === 'kz' ? 'kk' : rawLang
+	const lang = resolveLocale(params?.lang as string)
 
 	const [menuOpen, setMenuOpen] = useState(false)
 
@@ -55,34 +54,6 @@ export default function Header() {
 				: lang === 'ko'
 					? item.ko
 					: item.en
-
-	const shareTitle =
-		lang === 'ru'
-			? 'Хамит Аркаев (Хама) — Актёр, мастер боевых искусств'
-			: 'Khamit Arkayev (Hama) — Actor, Martial Artist'
-
-	const handleShare = async () => {
-		const shareData = { title: shareTitle, url: window.location.href }
-
-		if (typeof navigator.share === 'function') {
-			try {
-				await navigator.share(shareData)
-			} catch (err) {
-				if ((err as Error).name !== 'AbortError') {
-					console.error('Share failed', err)
-				}
-			}
-			return
-		}
-
-		try {
-			await navigator.clipboard.writeText(window.location.href)
-			toast.success(lang === 'ru' ? 'Ссылка скопирована!' : 'Link copied!')
-		} catch (err) {
-			console.error('Copy failed', err)
-			toast.error(lang === 'ru' ? 'Не удалось скопировать' : 'Could not copy')
-		}
-	}
 
 	return (
 		<header className='fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-neutral-100'>
@@ -113,22 +84,16 @@ export default function Header() {
 				</nav>
 
 				<div className='flex items-center gap-3 sm:gap-4 md:gap-6 2xl:gap-8'>
-					<button
-						type='button'
-						onClick={handleShare}
-						className='p-1.5 sm:p-2 text-neutral-600 hover:text-black transition cursor-pointer'
-						aria-label='Share'
-					>
-						<LuShare2 size={18} className='sm:w-[18px] sm:h-[18px]' />
-					</button>
+					<ShareModal lang={lang} />
 
-					{/* Отдельный компонент языкового переключателя */}
 					<LanguageSwitcher currentLang={lang} />
 
 					{/* Мобильное меню — бургер */}
 					<button
 						type='button'
 						onClick={() => setMenuOpen(v => !v)}
+						aria-expanded={menuOpen}
+						aria-controls='mobile-nav'
 						className='lg:hidden p-1.5 sm:p-2 text-neutral-600 hover:text-black transition cursor-pointer'
 						aria-label='Menu'
 					>
@@ -144,7 +109,10 @@ export default function Header() {
 						className='lg:hidden fixed inset-0 top-16 sm:top-20 bg-black/50 z-40'
 						onClick={() => setMenuOpen(false)}
 					/>
-					<nav className='lg:hidden absolute top-full left-0 w-full bg-neutral-950 shadow-xl z-50'>
+					<nav
+						id='mobile-nav'
+						className='lg:hidden absolute top-full left-0 w-full bg-neutral-950 shadow-xl z-50'
+					>
 						<div className='container mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-x-6'>
 							{NAV.map(item => (
 								<a

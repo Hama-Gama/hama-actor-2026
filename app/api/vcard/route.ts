@@ -2,30 +2,26 @@ import { NextResponse } from 'next/server'
 import { ACTOR_VCARD } from '@/lib/vcard-config'
 
 export async function GET() {
-	const { firstName, lastName, title, phone, email, website, photoUrl } =
-		ACTOR_VCARD
-
-	const lines = [
+	const vcard = [
 		'BEGIN:VCARD',
 		'VERSION:3.0',
-		`N:${lastName};${firstName};;;`,
-		`FN:${firstName} ${lastName}`,
-		`TITLE:${title}`,
-		`TEL;TYPE=CELL,VOICE:${phone}`,
-		`EMAIL;TYPE=INTERNET:${email}`,
-		`URL:${website}`,
-		photoUrl ? `PHOTO;VALUE=URI:${photoUrl}` : null,
+		`N:${ACTOR_VCARD.lastName};${ACTOR_VCARD.firstName};;;`,
+		`FN:${ACTOR_VCARD.firstName} ${ACTOR_VCARD.lastName}`,
+		'NICKNAME:Hama, Хама, 하마',
+		`TITLE:${ACTOR_VCARD.title}`,
+		'TEL;TYPE=CELL,VOICE,NONE:+77002541195',
+		'EMAIL;TYPE=INTERNET:contact@hama-actor.com',
+		'URL:https://hama-actor.com',
 		'END:VCARD',
-	].filter(Boolean)
-
-	const vcard = lines.join('\r\n')
+	].join('\r\n')
 
 	return new NextResponse(vcard, {
+		status: 200,
 		headers: {
-			// text/vcard критично — именно от него iOS/Android триггерят
-			// "Добавить контакт" вместо обычной загрузки файла
 			'Content-Type': 'text/vcard; charset=utf-8',
-			'Content-Disposition': `attachment; filename="${firstName}_${lastName}.vcf"`,
+			'Content-Disposition': 'attachment; filename="Khamit_Arkayev.vcf"',
 		},
 	})
 }
+
+
