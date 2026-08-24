@@ -1,3 +1,9 @@
+contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
+на корейском языке какао по умолчанию
+contact form activate
+add link to telegram, kakao etc.
+skills video, share link or upload raw video?
+
 crossbrauser
 
 seo
@@ -5,11 +11,6 @@ seo
 skills (acro, tkd, boxing)  google drive (one folder for all)
 redesign about page
 
-contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
-
-hero mobile name & last name one line smaller size. ostalnie kak est'.
-
-social network style update sdelat' krasivee chitabelnee
 
 
 SHARING / SHARE UX
@@ -37,17 +38,8 @@ SHARING / SHARE UX
 
 
 на будущее:
-copy параметры контакты зависят от языка (какао для кореи)
-форма тоже самое какао для корейского языка дроп селект
 эмейл подписка на новости
 Бэкстейдж.
-
-
-
-
-
-
-
 
 
 Как это устроено на стороне твоего сайта? (2 продвинутых сценария)
