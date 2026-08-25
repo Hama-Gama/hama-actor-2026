@@ -9,7 +9,7 @@ const WEBSITE_URL = '/'
 const SHOWREEL_URL = 'https://vimeo.com/hama_gamma/showreel'
 const PORTFOLIO_PDF_URL = '/portfolio.pdf'
 const TELEGRAM_URL = 'https://t.me/hama_gamma'
-const WHATSAPP_URL = 'https://wa.me/77002541195'
+const WHATSAPP_URL = 'https://wa.me/77078919181'
 const INSTAGRAM_URL = 'https://instagram.com/hama_gamma'
 const KAKAOTALK_URL = 'https://open.kakao.com/o/...'
 

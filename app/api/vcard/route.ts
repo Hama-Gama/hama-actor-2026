@@ -9,7 +9,7 @@ export async function GET() {
 		`FN:${ACTOR_VCARD.firstName} ${ACTOR_VCARD.lastName}`,
 		'NICKNAME:Hama, Хама, 하마',
 		`TITLE:${ACTOR_VCARD.title}`,
-		'TEL;TYPE=CELL,VOICE,NONE:+77002541195',
+		'TEL;TYPE=CELL,VOICE,NONE:+77078919181',
 		'EMAIL;TYPE=INTERNET:ardager121@mail.ru',
 		'URL:https://hama-actor.com',
 		'END:VCARD',

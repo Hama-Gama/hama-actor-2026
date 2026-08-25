@@ -4,31 +4,17 @@ import React, { useCallback, useRef, useState } from 'react'
 import { Play, X } from 'lucide-react'
 import { SiGoogledrive } from 'react-icons/si'
 import Image from 'next/image'
+import {
+	SHOWREELS,
+	SHOWREEL_LINKS,
+	SHOWREEL_TRANSLATIONS,
+	WARM_UP_ORIGINS,
+} from '@/lib/showreel-config'
 
 type ShowReelProps = {
 	locale?: string
 }
 
-const VIMEO_URL = 'https://player.vimeo.com/video/222087977?h=f80f6ce383'
-const DRIVE_URL =
-	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
-
-// Домены, к которым реально обращается Vimeo-плеер при инициализации.
-// Дублирует статический <link rel="preconnect"> из layout.tsx (см. заметку
-// в конце файла) — этот, точечный, срабатывает только по намерению
-// пользователя навести/тапнуть на карточку главного видео, а не по таймеру
-// на весь сайт. Без crossOrigin: iframe грузится обычной навигацией без
-// CORS, так что "anonymous" соединение браузер бы просто не переиспользовал.
-const WARM_UP_ORIGINS = [
-	'https://player.vimeo.com',
-	'https://f.vimeocdn.com',
-	'https://i.vimeocdn.com',
-]
-
-// Network Information API — есть не во всех браузерах и не описана в
-// стандартных типах DOM lib.dom.d.ts, поэтому объявляем свой минимальный тип
-// и расширяем им Navigator через intersection — без хрупких ts-ignore/expect-error,
-// которые легко ломаются при форматировании кода.
 type NetworkInformation = {
 	saveData?: boolean
 	effectiveType?: string
@@ -48,50 +34,7 @@ function isSlowConnection(): boolean {
 	return false
 }
 
-const TRANSLATIONS = {
-	en: {
-		heading: 'Showreels',
-		close: 'Close',
-		reels: {
-			main: { title: 'Main Showreel', category: 'General Portfolio' },
-			drama: { title: 'Drama Showreel', category: 'Acting / Dialogue' },
-			action: { title: 'Action Showreel', category: 'Martial Arts / Stunts' },
-			selftape: { title: 'Self-Tape / Slate', category: 'Introduction' },
-		},
-	},
-	ru: {
-		heading: 'Шоурилы',
-		close: 'Закрыть',
-		reels: {
-			main: { title: 'Основной шоурил', category: 'Общее портфолио' },
-			drama: { title: 'Драматический шоурил', category: 'Актёрская игра' },
-			action: { title: 'Экшен шоурил', category: 'Боевые искусства' },
-			selftape: { title: 'Визитка / Селф-тейп', category: 'Представление' },
-		},
-	},
-	kk: {
-		heading: 'Шоурилдер',
-		close: 'Жабу',
-		reels: {
-			main: { title: 'Негізгі шоурил', category: 'Жалпы портфолио' },
-			drama: { title: 'Драмалық шоурил', category: 'Актёрлік шеберлік' },
-			action: { title: 'Экшен шоурил', category: 'Жекпе-жек өнері' },
-			selftape: { title: 'Визитка / Селф-тейп', category: 'Таныстыру' },
-		},
-	},
-	ko: {
-		heading: '쇼릴',
-		close: '닫기',
-		reels: {
-			main: { title: '메인 쇼릴', category: '전체 포트폴리오' },
-			drama: { title: '드라마 쇼릴', category: '연기 / 대사' },
-			action: { title: '액션 쇼릴', category: '무술 / 스턴트' },
-			selftape: { title: '셀프테이프', category: '자기소개' },
-		},
-	},
-} as const
-
-function normalizeLocale(locale?: string): keyof typeof TRANSLATIONS {
+function normalizeLocale(locale?: string): keyof typeof SHOWREEL_TRANSLATIONS {
 	if (!locale) return 'en'
 	const value = locale.toLowerCase()
 	if (value.startsWith('ru')) return 'ru'
@@ -108,11 +51,6 @@ type Reel = {
 	category: string
 }
 
-// Точечный прогрев соединения по намерению пользователя: hover (десктоп)
-// или touchstart (мобильные) над карточкой главного видео. Срабатывает
-// один раз, ничего не грузит на медленном/экономном соединении
-// (Data Saver, 2G) — там пользователю важнее не тратить канал впустую,
-// чем выиграть 100-300мс на открытии плеера.
 function useVimeoWarmupOnIntent() {
 	const warmedUp = useRef(false)
 
@@ -130,11 +68,6 @@ function useVimeoWarmupOnIntent() {
 	}, [])
 }
 
-// Карточка теперь только показывает превью + кнопку play — само видео
-// (iframe) больше не грузится внутри карточки вообще, только по клику
-// в модалке. Это заодно чинит и производительность: раньше iframe
-// подгружался заранее через IntersectionObserver даже если юзер так и не
-// нажал play.
 function ShowreelCard({
 	reel,
 	onPlay,
@@ -188,44 +121,22 @@ function ShowreelCard({
 
 export const ShowReel = ({ locale }: ShowReelProps) => {
 	const resolvedLocale = normalizeLocale(locale)
-	const t = TRANSLATIONS[resolvedLocale]
+	const t = SHOWREEL_TRANSLATIONS[resolvedLocale]
 
 	const [activeReel, setActiveReel] = useState<Reel | null>(null)
 
-	const reelsData: Reel[] = [
-		{
-			id: 'main',
-			thumb: '/thumbnails/1.webp',
-			url: VIMEO_URL,
-			...t.reels.main,
-		},
-		{
-			id: 'drama',
-			thumb: '/thumbnails/2.webp',
-			url: VIMEO_URL,
-			...t.reels.drama,
-		},
-		{
-			id: 'action',
-			thumb: '/thumbnails/3.webp',
-			url: VIMEO_URL,
-			...t.reels.action,
-		},
-		{
-			id: 'selftape',
-			thumb: '/thumbnails/4.webp',
-			url: VIMEO_URL,
-			...t.reels.selftape,
-		},
-	]
+	const reelsData: Reel[] = SHOWREELS.map(reel => {
+		const translation = t.reels[reel.id as keyof typeof t.reels]
+		return {
+			...reel,
+			title: translation.title,
+			category: translation.category,
+		}
+	})
 
-	// Прогрев соединения только для главного (самого частокликаемого)
-	// видео, и только по намерению пользователя (hover/touch), а не
-	// автоматически всем подряд.
 	const warmupMainReel = useVimeoWarmupOnIntent()
 
 	return (
-		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
 		<section
 			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 scroll-mt-24'
 			id='showreels'
@@ -239,7 +150,7 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 				</div>
 
 				<a
-					href={DRIVE_URL}
+					href={SHOWREEL_LINKS.driveUrl}
 					target='_blank'
 					rel='noopener noreferrer'
 					className='inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-2 border border-black bg-transparent text-black transition-colors hover:bg-black hover:text-white group shrink-0'
@@ -265,7 +176,6 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 				))}
 			</div>
 
-			{/* Модалка с видео — открывается по клику на play у любой карточки */}
 			{activeReel && (
 				<div
 					className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4'

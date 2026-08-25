@@ -11,10 +11,12 @@
 // ──────────────────────────────────────────────────────────────
 // Каждая запись — это один кружок в сетке на секции "Контакты".
 //
-// Два вида записей:
-//  - kind: 'link'  → обычная ссылка, открывается в новой вкладке (href обязателен)
-//  - kind: 'copy'  → как WeChat: по клику текст копируется в буфер обмена
-//                     (value обязателен, href не нужен)
+// Три вида записей:
+//  - kind: 'link' → обычная ссылка, открывается в новой вкладке (href обязателен)
+//  - kind: 'copy' → по клику текст копируется в буфер обмена (value обязателен)
+//  - kind: 'qr'   → по клику открывается модалка с QR-кодом (как WeChat) —
+//                    нужен И value (ID/ссылка для показа+копирования), И
+//                    qrImage (путь к картинке QR в /public)
 //
 // iconId — берётся из ICON_MAP в Contacts.tsx (там сопоставлены иконки).
 // Если добавляешь мессенджер, для которого ещё нет иконки в ICON_MAP —
@@ -42,6 +44,16 @@ export type ContactLink =
 			copiedMessageKey: 'wechatIdCopied'
 			failedMessageKey: 'wechatCopyFailed'
 	  }
+	| {
+			id: string
+			name: string
+			iconId: IconId
+			kind: 'qr'
+			value: string
+			qrImage: string
+			copiedMessageKey: 'wechatIdCopied'
+			failedMessageKey: 'wechatCopyFailed'
+	  }
 
 // Список доступных иконок — соответствует ключам в ICON_MAP (Contacts.tsx)
 export type IconId =
@@ -57,7 +69,7 @@ export const CONTACT_LINKS: ContactLink[] = [
 		name: 'WhatsApp',
 		iconId: 'whatsapp',
 		kind: 'link',
-		href: 'https://wa.me/77002541195',
+		href: 'https://wa.me/77078919181',
 	},
 	{
 		id: 'telegram',
@@ -78,14 +90,15 @@ export const CONTACT_LINKS: ContactLink[] = [
 		name: 'KakaoTalk',
 		iconId: 'kakaotalk',
 		kind: 'link',
-		href: '#', // TODO: заменить на реальную ссылку/open.kakao.com/... когда будет
+		href: 'https://open.kakao.com/o/s7KXzwKi',
 	},
 	{
 		id: 'wechat',
 		name: 'WeChat',
 		iconId: 'wechat',
-		kind: 'copy',
-		value: 'hama_arkayev', // TODO: замени на реальный WeChat ID
+		kind: 'qr',
+		value: 'wxid_zmfdnqr0qj5t22',
+		qrImage: '/wechat-qr.jpg',
 		copiedMessageKey: 'wechatIdCopied',
 		failedMessageKey: 'wechatCopyFailed',
 	},

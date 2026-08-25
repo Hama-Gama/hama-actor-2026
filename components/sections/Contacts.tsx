@@ -1,45 +1,28 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
+import Image from 'next/image'
 import { toast } from 'sonner'
-import {
-	FaInstagram,
-	FaTelegramPlane,
-	FaWhatsapp,
-	FaWeixin,
-	FaComment,
-} from 'react-icons/fa'
+import { LuCopy, LuX, LuCheck } from 'react-icons/lu'
 import { ContactForm } from './ContactForm'
-import { CONTACT_LINKS, type IconId } from '@/lib/contacts-config'
+import { ContactLinkButton } from '../layout/contacts/ContactLinkButton'
+import { CONTACT_LINKS, type ContactLink } from '@/lib/contacts-config'
 
 type ContactsProps = {
 	locale?: string
 }
 
-// Сопоставление iconId (из конфига) → React-компонент иконки.
-// Добавляешь новый мессенджер с новой иконкой — один раз добавь её сюда,
-// дальше в contacts-config.ts просто ссылаешься на iconId.
-const ICON_MAP: Record<IconId, React.ReactNode> = {
-	whatsapp: <FaWhatsapp size={24} />,
-	telegram: <FaTelegramPlane size={24} />,
-	instagram: <FaInstagram size={24} />,
-	kakaotalk: <FaComment size={24} />,
-	wechat: <FaWeixin size={24} />,
-}
-
-// Единый стиль иконки-кружка для всех контактов — меняешь один раз здесь,
-// применяется одинаково и к <a>, и к <button> (WeChat).
-// Mobile-first: размер круга растёт от мобильного к ultra-wide (w-14 → w-24).
-const ICON_CIRCLE_CLASS =
-	'w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 2xl:w-24 2xl:h-24 flex items-center justify-center rounded-full border border-neutral-600 group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-300'
-
-const ICON_LABEL_CLASS =
-	'font-mono text-[9px] sm:text-[10px] 2xl:text-xs uppercase tracking-widest font-bold opacity-40 group-hover:opacity-100 transition-opacity'
-
 export const Contacts = ({ locale }: ContactsProps) => {
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
 	const isKk = locale === 'kk' || locale === 'kz'
+
+	// Состояние для выбранного контакту с QR-кодом (например, WeChat)
+	const [activeQrLink, setActiveQrLink] = useState<Extract<
+		ContactLink,
+		{ kind: 'qr' }
+	> | null>(null)
+	const [copied, setCopied] = useState(false)
 
 	const t = {
 		heading: isRu
@@ -77,55 +60,66 @@ export const Contacts = ({ locale }: ContactsProps) => {
 				: isKk
 					? 'Немесе тікелей жазыңыз'
 					: '또는 직접 연락하기',
+		scanQr: isRu
+			? 'Отсканируйте QR-код в WeChat'
+			: isEn
+				? 'Scan QR code in WeChat'
+				: isKk
+					? 'WeChat-та QR-кодты сканерлеңіз'
+					: 'WeChat에서 QR 코드를 스캔하세요',
+		copy: isRu ? 'Скопировать' : isEn ? 'Copy' : isKk ? 'Көшіру' : '복사',
+		copied: isRu
+			? 'Скопировано!'
+			: isEn
+				? 'Copied!'
+				: isKk
+					? 'Көшірілді!'
+					: '복사됨!',
 	}
 
-	// Ключи 'wechatIdCopied' / 'wechatCopyFailed' в contacts-config.ts
-	// ссылаются на записи этого объекта — так тосты остаются переводимыми,
-	// а сам текст живёт тут, рядом с остальными переводами секции.
 	const toastMessages: Record<'wechatIdCopied' | 'wechatCopyFailed', string> = {
 		wechatIdCopied: t.wechatIdCopied,
 		wechatCopyFailed: t.wechatCopyFailed,
 	}
 
-	const handleCopyClick = async (
-		value: string,
-		messageKeys: {
-			copiedMessageKey: 'wechatIdCopied'
-			failedMessageKey: 'wechatCopyFailed'
-		},
-	) => {
+	const handleCopy = async (link: Extract<ContactLink, { kind: 'copy' }>) => {
 		try {
-			await navigator.clipboard.writeText(value)
-			toast.success(`${toastMessages[messageKeys.copiedMessageKey]}: ${value}`)
+			await navigator.clipboard.writeText(link.value)
+			toast.success(`${toastMessages[link.copiedMessageKey]}: ${link.value}`)
 		} catch (err) {
 			console.error('Failed to copy contact value', err)
-			toast.error(toastMessages[messageKeys.failedMessageKey])
+			toast.error(toastMessages[link.failedMessageKey])
+		}
+	}
+
+	const handleModalCopy = async (value: string) => {
+		try {
+			await navigator.clipboard.writeText(value)
+			setCopied(true)
+			toast.success(`${t.wechatIdCopied}: ${value}`)
+			setTimeout(() => setCopied(false), 2000)
+		} catch (err) {
+			console.error('Failed to copy modal value', err)
+			toast.error(t.wechatCopyFailed)
 		}
 	}
 
 	return (
-		// Mobile-first: без префикса — стили <640px, дальше слоями sm/md/lg/xl/2xl.
-		// Структура grid/flex НЕ меняется — только отступы, паддинги, размеры шрифта.
 		<section
 			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 border-t border-neutral-100 scroll-mt-24'
 			id='contact'
 		>
 			<div className='text-center max-w-3xl 2xl:max-w-4xl mx-auto'>
-				{/* Метка над заголовком */}
 				<span className='font-mono text-[10px] 2xl:text-xs uppercase tracking-[0.4em] text-[#d90416] mb-3 sm:mb-4 block font-bold'>
-					// {t.sub}
+					 {t.sub}
 				</span>
 
 				<h2 className='font-display text-2xl sm:text-3xl lg:text-4xl 2xl:text-5xl font-bold uppercase italic tracking-tighter mb-4 sm:mb-6'>
 					{t.heading}
 				</h2>
 
-				{/* Форма — вместо публичной почты */}
 				<ContactForm locale={locale} />
 
-				{/* Разделитель "быстрый путь" vs "формальная заявка" — чтобы было
-				    видно с первого взгляда, что это два разных способа связаться,
-				    а не одна форма плюс список иконок под ней "просто так". */}
 				<div className='flex items-center gap-4 mb-6 sm:mb-8'>
 					<span className='flex-1 h-px bg-neutral-100' />
 					<span className='font-mono text-[9px] sm:text-[10px] 2xl:text-xs uppercase tracking-[0.3em] text-neutral-400 whitespace-nowrap'>
@@ -134,41 +128,70 @@ export const Contacts = ({ locale }: ContactsProps) => {
 					<span className='flex-1 h-px bg-neutral-100' />
 				</div>
 
-				{/* Сетка мессенджеров — рендерится из lib/contacts-config.ts.
-				    Чтобы добавить/убрать мессенджер, редактируй CONTACT_LINKS
-				    там, а не этот файл. */}
 				<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 sm:gap-8 md:gap-12 2xl:gap-16'>
-					{CONTACT_LINKS.map(link =>
-						link.kind === 'link' ? (
-							<a
-								key={link.id}
-								href={link.href}
-								target='_blank'
-								rel='noopener noreferrer'
-								className='group flex flex-col items-center gap-3 sm:gap-4 transition-all'
-							>
-								<div className={ICON_CIRCLE_CLASS}>{ICON_MAP[link.iconId]}</div>
-								<span className={ICON_LABEL_CLASS}>{link.name}</span>
-							</a>
-						) : (
-							<button
-								key={link.id}
-								type='button'
-								onClick={() =>
-									handleCopyClick(link.value, {
-										copiedMessageKey: link.copiedMessageKey,
-										failedMessageKey: link.failedMessageKey,
-									})
-								}
-								className='group flex flex-col items-center gap-3 sm:gap-4 transition-all cursor-pointer'
-							>
-								<div className={ICON_CIRCLE_CLASS}>{ICON_MAP[link.iconId]}</div>
-								<span className={ICON_LABEL_CLASS}>{link.name}</span>
-							</button>
-						),
-					)}
+					{CONTACT_LINKS.map(link => (
+						<ContactLinkButton
+							key={link.id}
+							link={link}
+							onCopy={handleCopy}
+							onOpenQr={qrLink => setActiveQrLink(qrLink)}
+						/>
+					))}
 				</div>
 			</div>
+
+			{/* Модальное окно с QR-кодом и ID */}
+			{activeQrLink && (
+				<div className='fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200'>
+					<div
+						className='absolute inset-0'
+						onClick={() => setActiveQrLink(null)}
+					/>
+
+					<div className='relative w-full max-w-sm bg-white rounded-2xl p-6 shadow-2xl z-10 border border-neutral-100 flex flex-col items-center text-center'>
+						<button
+							type='button'
+							onClick={() => setActiveQrLink(null)}
+							className='absolute top-4 right-4 p-1.5 text-neutral-400 hover:text-black transition rounded-full hover:bg-neutral-100'
+						>
+							<LuX size={20} />
+						</button>
+
+						<h3 className='font-mono text-sm uppercase font-bold tracking-wider mb-4 text-black'>
+							{activeQrLink.name}
+						</h3>
+
+						{/* Картинка QR-кода */}
+						<div className='relative w-48 h-48 sm:w-56 sm:h-56 p-2 bg-white border border-neutral-200 rounded-xl shadow-sm mb-3'>
+							<Image
+								src={activeQrLink.qrImage}
+								alt={`${activeQrLink.name} QR Code`}
+								fill
+								className='object-contain p-2'
+							/>
+						</div>
+
+						<p className='font-mono text-[11px] text-neutral-400 uppercase tracking-widest mb-6'>
+							{t.scanQr}
+						</p>
+
+						{/* Поле с ID и кнопка скопировать */}
+						<div className='w-full flex items-center gap-2 p-1.5 pl-3 bg-neutral-50 border border-neutral-200 rounded-lg'>
+							<span className='font-mono text-xs text-neutral-600 truncate flex-1 text-left font-bold'>
+								ID: {activeQrLink.value}
+							</span>
+							<button
+								type='button'
+								onClick={() => handleModalCopy(activeQrLink.value)}
+								className='flex items-center gap-1.5 bg-black hover:bg-[#d90416] text-white font-mono text-xs uppercase font-bold px-3 py-2 rounded-md transition-colors shrink-0'
+							>
+								{copied ? <LuCheck size={14} /> : <LuCopy size={14} />}
+								<span>{copied ? t.copied : t.copy}</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</section>
 	)
 }

@@ -23,7 +23,7 @@ const FOOTER_TRANSLATIONS = {
 	},
 	kk: {
 		firstName: 'Хамит',
-		lastName: 'Арқаев',
+		lastName: 'Аркаев',
 		rights: 'Барлық құқықтар қорғалған',
 		developed: 'Hama әзірлеген',
 		role: 'Актёр // Жекпе-жек өнері',

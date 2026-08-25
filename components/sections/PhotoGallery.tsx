@@ -17,10 +17,12 @@ import 'swiper/css/pagination'
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
 
+// Конфигурация галереи
+import { GALLERY_PHOTOS } from '@/lib/gallery-config'
+
 const DRIVE_URL =
 	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
 
-// Вспомогательная функция для локали
 function normalizeLocale(locale?: string): 'en' | 'ru' | 'kk' | 'ko' {
 	if (!locale) return 'en'
 	const value = locale.toLowerCase()
@@ -29,34 +31,6 @@ function normalizeLocale(locale?: string): 'en' | 'ru' | 'kk' | 'ko' {
 	if (value.startsWith('ko')) return 'ko'
 	return 'en'
 }
-
-const PHOTOS = [
-	{
-		src: '/gallery/11.webp',
-		width: 800,
-		height: 1200,
-		alt: 'Khamit Arkayev Headshot',
-	},
-	{ src: '/gallery/22.webp', width: 1200, height: 800, alt: 'Action Scene' },
-	{
-		src: '/gallery/33.webp',
-		width: 1000,
-		height: 1500,
-		alt: 'Dramatic Look',
-	},
-	{
-		src: '/gallery/44.webp',
-		width: 1200,
-		height: 800,
-		alt: 'Stunt Performance',
-	},
-	{
-		src: '/gallery/55.webp',
-		width: 1200,
-		height: 800,
-		alt: 'Stunt Performance',
-	},
-]
 
 export const PhotoGallery = ({ locale }: { locale?: string }) => {
 	const [index, setIndex] = useState(-1)
@@ -83,7 +57,6 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 			className='container mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-8 sm:py-10 lg:py-12 scroll-mt-24'
 			id='photos'
 		>
-			{/* Уменьшенные отступы mb-4 sm:mb-5 и pb-3 sm:pb-4 */}
 			<div className='mb-4 sm:mb-5 flex items-center justify-between gap-4 border-b border-neutral-100 pb-3 sm:pb-4 w-full'>
 				<div className='flex items-center gap-3 sm:gap-6'>
 					<div className='h-8 sm:h-10 2xl:h-12 w-[3px] bg-[#d90416]' />
@@ -95,7 +68,6 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 					</span>
 				</div>
 
-				{/* Кнопка Google Drive */}
 				<a
 					href={DRIVE_URL}
 					target='_blank'
@@ -117,25 +89,26 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 				<Swiper
 					modules={[Navigation, Pagination, Mousewheel]}
 					spaceBetween={16}
-					slidesPerView={1}
+					slidesPerView={1.2}
 					grabCursor={true}
 					observer={true}
 					observeParents={true}
 					mousewheel={{ forceToAxis: true }}
 					pagination={{
+						el: '.custom-swiper-pagination',
 						clickable: true,
 						dynamicBullets: true,
 					}}
 					breakpoints={{
-						640: { slidesPerView: 2, spaceBetween: 20 },
-						1024: { slidesPerView: 3, spaceBetween: 20 },
-						1536: { slidesPerView: 4, spaceBetween: 24 },
+						640: { slidesPerView: 2.2, spaceBetween: 20 },
+						1024: { slidesPerView: 3.25, spaceBetween: 20 },
+						1536: { slidesPerView: 4.25, spaceBetween: 24 },
 					}}
-					className='pb-8 sm:pb-10'
+					className='mb-4'
 				>
-					{PHOTOS.map((photo, i) => (
+					{GALLERY_PHOTOS.map((photo, i) => (
 						<SwiperSlide
-							key={i}
+							key={photo.src}
 							className='overflow-hidden rounded-sm bg-neutral-100'
 						>
 							<button
@@ -143,16 +116,14 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 								className='relative block aspect-[3/4] w-full cursor-zoom-in group'
 								onClick={() => setIndex(i)}
 							>
-								{/* Изображение */}
 								<Image
 									src={photo.src}
 									alt={photo.alt}
 									fill
 									className='object-cover transition-transform duration-700 group-hover:scale-105'
-									sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw'
+									sizes='(max-width: 640px) 80vw, (max-width: 1024px) 45vw, (max-width: 1536px) 30vw, 22vw'
 								/>
 
-								{/* Оверлей при наведении */}
 								<div className='absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30 flex items-center justify-center'>
 									<div className='font-mono text-[9px] sm:text-[10px] uppercase text-white tracking-widest bg-black/50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity'>
 										View Fullscreen
@@ -162,11 +133,13 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 						</SwiperSlide>
 					))}
 				</Swiper>
+
+				{/* Вынесенные буллеты под карточками */}
+				<div className='custom-swiper-pagination flex justify-center items-center gap-1 mt-6 h-6' />
 			</div>
 
-			{/* LIGHTBOX */}
 			<Lightbox
-				slides={PHOTOS}
+				slides={GALLERY_PHOTOS}
 				open={index >= 0}
 				index={index}
 				close={() => setIndex(-1)}
@@ -177,12 +150,21 @@ export const PhotoGallery = ({ locale }: { locale?: string }) => {
 			/>
 
 			<style jsx global>{`
-				.photo-slider-container .swiper-pagination-bullet {
-					background: #neutral-300;
-					opacity: 0.7;
+				.custom-swiper-pagination {
+					position: relative !important;
+					bottom: auto !important;
+					top: auto !important;
+					width: 100% !important;
 				}
-				.photo-slider-container .swiper-pagination-bullet-active {
-					background: #ffffff;
+				.custom-swiper-pagination .swiper-pagination-bullet {
+					background: #a3a3a3 !important;
+					opacity: 0.5;
+					transition: all 0.3s ease;
+				}
+				.custom-swiper-pagination .swiper-pagination-bullet-active {
+					background: #000000 !important;
+					opacity: 1;
+					transform: scale(1.2);
 				}
 			`}</style>
 		</section>
