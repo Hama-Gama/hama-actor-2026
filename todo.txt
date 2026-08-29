@@ -1,5 +1,4 @@
 contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
-на корейском языке какао по умолчанию
 contact form activate
 add link to telegram, kakao etc.
 skills video, share link or upload raw video?
@@ -7,6 +6,8 @@ skills video, share link or upload raw video?
 crossbrauser
 
 seo
+
+QR code to the end of each 
 
 skills (acro, tkd, boxing)  google drive (one folder for all)
 redesign about page
