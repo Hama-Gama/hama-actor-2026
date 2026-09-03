@@ -13,25 +13,42 @@ type ContactFormProps = {
 	locale?: string
 }
 
-const initialValues: ContactFormValues = {
-	name: '',
-	projectRole: '',
-	deadline: '',
-	preferredContact: 'telegram',
-	otherMethodLabel: '',
-	contactValue: '',
-	message: '',
-	company: '',
+// Способ связи по умолчанию зависит от локали: для корейской версии
+// логичнее KakaoTalk (Telegram/WhatsApp там почти не используются),
+// для остальных локалей — Telegram, как и раньше.
+const getInitialValues = (locale?: string): ContactFormValues => {
+	const isRu = locale === 'ru'
+	const isEn = locale === 'en'
+	const isKk = locale === 'kk' || locale === 'kz'
+	// default (else) branch = Korean, как и в contact.ts / остальных компонентах
+	const isKo = !isRu && !isEn && !isKk
+
+	return {
+		name: '',
+		projectRole: '',
+		deadline: '',
+		preferredContact: isKo ? 'kakaotalk' : 'telegram',
+		otherMethodLabel: '',
+		contactValue: '',
+		message: '',
+		company: '',
+	}
 }
 
 export const ContactForm = ({ locale }: ContactFormProps) => {
-	const [values, setValues] = useState<ContactFormValues>(initialValues)
-	const [errors, setErrors] = useState<
-		Partial<Record<keyof ContactFormValues, string>>
-	>({})
+	const [values, setValues] = useState<ContactFormValues>(() =>
+		getInitialValues(locale),
+	)
+const [errors, setErrors] = useState<
+	Partial<Record<keyof ContactFormValues, string>>
+>({})
 	const [submitting, setSubmitting] = useState(false)
 	const [methodOpen, setMethodOpen] = useState(false)
 	const methodRef = useRef<HTMLDivElement>(null)
+
+	// Момент открытия формы — для timing-проверки на сервере (см.
+	// /api/contact): бот шлёт POST сразу после GET, живой человек — нет.
+	const formLoadedAtRef = useRef(Date.now())
 
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
@@ -176,7 +193,7 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 
 		// honeypot заполнен ботом — молча "успех", ничего не отправляем
 		if (values.company) {
-			setValues(initialValues)
+			setValues(getInitialValues(locale))
 			return
 		}
 
@@ -198,13 +215,17 @@ export const ContactForm = ({ locale }: ContactFormProps) => {
 			const res = await fetch('/api/contact', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ...result.data, locale }),
+				body: JSON.stringify({
+					...result.data,
+					locale,
+					formLoadedAt: formLoadedAtRef.current,
+				}),
 			})
 
 			if (!res.ok) throw new Error('Request failed')
 
 			toast.success(t.success)
-			setValues(initialValues)
+			setValues(getInitialValues(locale))
 			setErrors({})
 		} catch (err) {
 			console.error('Contact form submit error', err)

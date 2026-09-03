@@ -71,7 +71,7 @@ function getPersonJsonLd(locale: Locale) {
 		description: content[locale].description,
 		url: locale === 'en' ? `${baseUrl}/` : `${baseUrl}/${locale}`,
 		sameAs: [
-			'https://wa.me/77078919181',
+			'https://wa.me/hama_gamma',
 			'https://t.me/hama_gamma',
 			'https://instagram.com/hama_gamma',
 		],

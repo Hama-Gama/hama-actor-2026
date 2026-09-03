@@ -69,7 +69,7 @@ export const CONTACT_LINKS: ContactLink[] = [
 		name: 'WhatsApp',
 		iconId: 'whatsapp',
 		kind: 'link',
-		href: 'https://wa.me/77078919181',
+		href: 'https://wa.me/hama_gamma',
 	},
 	{
 		id: 'telegram',
