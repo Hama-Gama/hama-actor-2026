@@ -1,13 +1,17 @@
+import type { Locale } from './locales'
+
 export interface ReelConfig {
 	id: string
 	thumb: string
-	url: string
+	// Ссылка на плеер отдельно для каждого языка — например, английская
+	// озвучка/монтаж шоурила может отличаться от русской. null = видео для
+	// этого языка ещё не готово → в UI покажется заглушка "Coming soon".
+	urls: Record<Locale, string | null>
 }
 
 export const SHOWREEL_LINKS = {
 	driveUrl:
-		'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing',
-	vimeoUrl: 'https://player.vimeo.com/video/222087977?h=f80f6ce383',
+		'https://drive.google.com/drive/folders/1R3WCvgBYKfYAH5mSFYj0iIuGB6hW2z1X?usp=sharing',
 } as const
 
 export const WARM_UP_ORIGINS = [
@@ -16,26 +20,36 @@ export const WARM_UP_ORIGINS = [
 	'https://i.vimeocdn.com',
 ] as const
 
+// Единственное готовое видео на сейчас — экшен-шоурил. Ссылка одна и та же
+// на все 4 языка (временно, как дубликат) — поменяешь на настоящие
+// локализованные ссылки, когда они появятся, прямо в объекте ниже.
+const ACTION_REEL_URL = 'https://player.vimeo.com/video/1194927304'
+
 export const SHOWREELS: ReelConfig[] = [
 	{
 		id: 'main',
 		thumb: '/thumbnails/1.webp',
-		url: SHOWREEL_LINKS.vimeoUrl,
+		urls: { en: null, ru: null, kk: null, ko: null },
 	},
 	{
 		id: 'drama',
 		thumb: '/thumbnails/2.webp',
-		url: SHOWREEL_LINKS.vimeoUrl,
+		urls: { en: null, ru: null, kk: null, ko: null },
 	},
 	{
 		id: 'action',
 		thumb: '/thumbnails/3.webp',
-		url: SHOWREEL_LINKS.vimeoUrl,
+		urls: {
+			en: ACTION_REEL_URL,
+			ru: ACTION_REEL_URL,
+			kk: ACTION_REEL_URL,
+			ko: ACTION_REEL_URL,
+		},
 	},
 	{
 		id: 'selftape',
-		thumb: '/thumbnails/4.webp',
-		url: SHOWREEL_LINKS.vimeoUrl,
+		thumb: '/thumbnails/4.jpg',
+		urls: { en: null, ru: null, kk: null, ko: null },
 	},
 ]
 
@@ -43,6 +57,7 @@ export const SHOWREEL_TRANSLATIONS = {
 	en: {
 		heading: 'Showreels',
 		close: 'Close',
+		comingSoon: 'Coming soon',
 		reels: {
 			main: { title: 'Main Showreel', category: 'General Portfolio' },
 			drama: { title: 'Drama Showreel', category: 'Acting / Dialogue' },
@@ -53,6 +68,7 @@ export const SHOWREEL_TRANSLATIONS = {
 	ru: {
 		heading: 'Шоурилы',
 		close: 'Закрыть',
+		comingSoon: 'Скоро',
 		reels: {
 			main: { title: 'Основной шоурил', category: 'Общее портфолио' },
 			drama: { title: 'Драматический шоурил', category: 'Актёрская игра' },
@@ -63,6 +79,7 @@ export const SHOWREEL_TRANSLATIONS = {
 	kk: {
 		heading: 'Шоурилдер',
 		close: 'Жабу',
+		comingSoon: 'Жақында',
 		reels: {
 			main: { title: 'Негізгі шоурил', category: 'Жалпы портфолио' },
 			drama: { title: 'Драмалық шоурил', category: 'Актёрлік шеберлік' },
@@ -73,6 +90,7 @@ export const SHOWREEL_TRANSLATIONS = {
 	ko: {
 		heading: '쇼릴',
 		close: '닫기',
+		comingSoon: '준비 중',
 		reels: {
 			main: { title: '메인 쇼릴', category: '전체 포트폴리오' },
 			drama: { title: '드라마 쇼릴', category: '연기 / 대사' },

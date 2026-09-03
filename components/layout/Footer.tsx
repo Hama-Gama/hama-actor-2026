@@ -73,7 +73,7 @@ export default function Footer({ lang }: FooterProps) {
 				<div className='flex flex-col items-center justify-between gap-6 sm:gap-8 lg:gap-10 md:flex-row'>
 					<div className='flex flex-col items-center md:items-start gap-2'>
 						<p className='font-mono text-[9px] sm:text-[10px] 2xl:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-neutral-500'>
-							© {new Date().getFullYear()} // {content.rights}
+							© {new Date().getFullYear()} {'//'} {content.rights}
 						</p>
 					</div>
 

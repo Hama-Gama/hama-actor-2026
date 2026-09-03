@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useRef, useState } from 'react'
-import { Play, X } from 'lucide-react'
+import { Play, X, Clock } from 'lucide-react'
 import { SiGoogledrive } from 'react-icons/si'
 import Image from 'next/image'
 import {
@@ -43,10 +43,12 @@ function normalizeLocale(locale?: string): keyof typeof SHOWREEL_TRANSLATIONS {
 	return 'en'
 }
 
+// url = null → для этого языка видео ещё не залито, карточка уходит в
+// режим "Coming soon" (не кликабельна, плеер не открывается).
 type Reel = {
 	id: string
 	thumb: string
-	url: string
+	url: string | null
 	title: string
 	category: string
 }
@@ -70,41 +72,75 @@ function useVimeoWarmupOnIntent() {
 
 function ShowreelCard({
 	reel,
+	comingSoonLabel,
 	onPlay,
 	onWarmup,
 }: {
 	reel: Reel
+	comingSoonLabel: string
 	onPlay: (reel: Reel) => void
 	onWarmup?: () => void
 }) {
+	const isComingSoon = reel.url === null
+
 	return (
 		<div className='group relative overflow-hidden rounded-lg sm:rounded-xl bg-neutral-900 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(217,4,22,0.15)]'>
 			<div className='relative aspect-video w-full bg-black overflow-hidden rounded-lg sm:rounded-2xl'>
 				<button
 					type='button'
-					aria-label={`Play ${reel.title}`}
-					className='absolute inset-0 block h-full w-full cursor-pointer'
-					onClick={() => onPlay(reel)}
-					onMouseEnter={onWarmup}
-					onTouchStart={onWarmup}
+					aria-label={
+						isComingSoon
+							? `${reel.title} — ${comingSoonLabel}`
+							: `Play ${reel.title}`
+					}
+					aria-disabled={isComingSoon}
+					// Заглушка не открывает плеер — просто ничего не делает по клику,
+					// но остаётся видимой в сетке (не skip/hidden), чтобы было понятно,
+					// что видео появится позже, а не пропало из вёрстки.
+					className={`absolute inset-0 block h-full w-full ${
+						isComingSoon ? 'cursor-default' : 'cursor-pointer'
+					}`}
+					onClick={() => {
+						if (isComingSoon) return
+						onPlay(reel)
+					}}
+					onMouseEnter={isComingSoon ? undefined : onWarmup}
+					onTouchStart={isComingSoon ? undefined : onWarmup}
 				>
 					<Image
 						src={reel.thumb}
 						alt={reel.title}
 						fill
-						className='object-cover transition-transform duration-1000 group-hover:scale-105'
+						className={`object-cover transition-transform duration-1000 ${
+							isComingSoon ? 'grayscale' : 'group-hover:scale-105'
+						}`}
 						sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw'
 					/>
-					<div className='absolute inset-0 bg-black/50 transition-opacity group-hover:bg-black/30' />
+					<div
+						className={`absolute inset-0 bg-black/50 transition-opacity ${
+							isComingSoon ? '' : 'group-hover:bg-black/30'
+						}`}
+					/>
+
 					<div className='absolute inset-0 flex items-center justify-center'>
-						<div className='flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 2xl:h-20 2xl:w-20 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
-							<Play
-								fill='currentColor'
-								size={22}
-								className='ml-1 sm:w-6 sm:h-6'
-							/>
-						</div>
+						{isComingSoon ? (
+							<div className='flex items-center gap-2 sm:gap-2.5 rounded-full border border-white/30 bg-white/10 px-4 sm:px-5 py-2 sm:py-2.5 text-white backdrop-blur-md'>
+								<Clock size={16} className='shrink-0' />
+								<span className='font-mono text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em]'>
+									{comingSoonLabel}
+								</span>
+							</div>
+						) : (
+							<div className='flex h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 2xl:h-20 2xl:w-20 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:bg-[#d90416] group-hover:border-[#d90416]'>
+								<Play
+									fill='currentColor'
+									size={22}
+									className='ml-1 sm:w-6 sm:h-6'
+								/>
+							</div>
+						)}
 					</div>
+
 					<div className='absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 2xl:p-10 text-left'>
 						<span className='mb-1.5 sm:mb-2 block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.3em] text-[#d90416]'>
 							{reel.category}
@@ -128,13 +164,22 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 	const reelsData: Reel[] = SHOWREELS.map(reel => {
 		const translation = t.reels[reel.id as keyof typeof t.reels]
 		return {
-			...reel,
+			id: reel.id,
+			thumb: reel.thumb,
+			url: reel.urls[resolvedLocale],
 			title: translation.title,
 			category: translation.category,
 		}
 	})
 
 	const warmupMainReel = useVimeoWarmupOnIntent()
+
+	const handlePlay = (reel: Reel) => {
+		// Доп. страховка: даже если что-то вызовет onPlay для заглушки,
+		// модалка с пустым src не откроется.
+		if (!reel.url) return
+		setActiveReel(reel)
+	}
 
 	return (
 		<section
@@ -170,13 +215,14 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 					<ShowreelCard
 						key={reel.id}
 						reel={reel}
-						onPlay={setActiveReel}
-						onWarmup={reel.id === 'main' ? warmupMainReel : undefined}
+						comingSoonLabel={t.comingSoon}
+						onPlay={handlePlay}
+						onWarmup={reel.id === 'action' ? warmupMainReel : undefined}
 					/>
 				))}
 			</div>
 
-			{activeReel && (
+			{activeReel && activeReel.url && (
 				<div
 					className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4'
 					onClick={() => setActiveReel(null)}
@@ -195,7 +241,9 @@ export const ShowReel = ({ locale }: ShowReelProps) => {
 
 						<div className='relative aspect-video w-full bg-black rounded-sm overflow-hidden'>
 							<iframe
-								src={`${activeReel.url}&autoplay=1`}
+								src={`${activeReel.url}${
+									activeReel.url.includes('?') ? '&' : '?'
+								}autoplay=1`}
 								title={activeReel.title}
 								className='absolute inset-0 h-full w-full'
 								allow='autoplay; fullscreen; picture-in-picture'

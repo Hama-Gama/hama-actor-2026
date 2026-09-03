@@ -1,18 +1,16 @@
+npm run lint error
+
 contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
 contact form activate
-add link to telegram, kakao etc.
+
 skills video, share link or upload raw video?
 
 crossbrauser
-
-seo
 
 QR code to the end of each 
 
 skills (acro, tkd, boxing)  google drive (one folder for all)
 redesign about page
-
-
 
 SHARING / SHARE UX
 -------------------

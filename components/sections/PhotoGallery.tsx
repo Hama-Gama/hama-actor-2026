@@ -21,7 +21,7 @@ import 'yet-another-react-lightbox/styles.css'
 import { GALLERY_PHOTOS } from '@/lib/gallery-config'
 
 const DRIVE_URL =
-	'https://drive.google.com/drive/folders/1vFiCIkv9dQ1EDjQlkZpD7NOSSRaNbiy6?usp=sharing'
+	'https://drive.google.com/drive/folders/1QVYFaatvA2xCbfIioLwhxbvH4s120h13?usp=sharing'
 
 function normalizeLocale(locale?: string): 'en' | 'ru' | 'kk' | 'ko' {
 	if (!locale) return 'en'
