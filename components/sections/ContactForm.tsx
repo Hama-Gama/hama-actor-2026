@@ -35,13 +35,28 @@ const getInitialValues = (locale?: string): ContactFormValues => {
 	}
 }
 
+// Авто-высота textarea по контенту — растёт вниз с добавлением строк,
+// вместо фиксированной высоты со скроллом, который прятал часть текста.
+function useAutoResizeTextarea(value: string) {
+	const ref = useRef<HTMLTextAreaElement>(null)
+
+	useEffect(() => {
+		const el = ref.current
+		if (!el) return
+		el.style.height = 'auto'
+		el.style.height = `${el.scrollHeight}px`
+	}, [value])
+
+	return ref
+}
+
 export const ContactForm = ({ locale }: ContactFormProps) => {
 	const [values, setValues] = useState<ContactFormValues>(() =>
 		getInitialValues(locale),
 	)
-const [errors, setErrors] = useState<
-	Partial<Record<keyof ContactFormValues, string>>
->({})
+	const [errors, setErrors] = useState<
+		Partial<Record<keyof ContactFormValues, string>>
+	>({})
 	const [submitting, setSubmitting] = useState(false)
 	const [methodOpen, setMethodOpen] = useState(false)
 	const methodRef = useRef<HTMLDivElement>(null)
@@ -49,6 +64,9 @@ const [errors, setErrors] = useState<
 	// Момент открытия формы — для timing-проверки на сервере (см.
 	// /api/contact): бот шлёт POST сразу после GET, живой человек — нет.
 	const formLoadedAtRef = useRef(Date.now())
+
+	const messageRef = useAutoResizeTextarea(values.message ?? '')
+	const contactValueRef = useAutoResizeTextarea(values.contactValue)
 
 	const isRu = locale === 'ru'
 	const isEn = locale === 'en'
@@ -188,6 +206,13 @@ const [errors, setErrors] = useState<
 		setMethodOpen(false)
 	}
 
+	// Contact value — по смыслу однострочное поле (email/номер/ник), просто
+	// с переносом при длинном значении. Enter не должен создавать перевод
+	// строки, как в обычном <input>.
+	const handleContactValueKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Enter') e.preventDefault()
+	}
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 
@@ -235,9 +260,12 @@ const [errors, setErrors] = useState<
 		}
 	}
 
-	// Mobile-first размеры полей: чуть компактнее на мобильном, растёт к 2xl.
+	// text-base = 16px фиксированно (без адаптива под 2xl) — читаемо на любом
+	// экране и не вызывает автозум на фокусе в iOS Safari (тот срабатывает
+	// на полях с шрифтом < 16px).
 	const inputClass =
-		'w-full bg-neutral-50 border border-neutral-200 rounded-sm px-3.5 sm:px-4 py-2.5 sm:py-3 2xl:py-3.5 text-sm 2xl:text-base focus:outline-none focus:border-[#d90416] transition-colors'
+		'w-full bg-neutral-50 border border-neutral-200 rounded-sm px-3.5 sm:px-4 py-2.5 sm:py-3 2xl:py-3.5 text-base focus:outline-none focus:border-[#d90416] transition-colors'
+	const autoResizeTextareaClass = `${inputClass} resize-none overflow-hidden leading-normal`
 	const labelClass =
 		'font-mono text-[9px] sm:text-[10px] 2xl:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] text-neutral-400 mb-1.5 sm:mb-2 block'
 	const errorClass = 'text-[#d90416] text-xs mt-1 font-mono'
@@ -345,12 +373,14 @@ const [errors, setErrors] = useState<
 
 				<div>
 					<label className={labelClass}>{t.contactValue}</label>
-					<input
-						type='text'
+					<textarea
+						ref={contactValueRef}
 						value={values.contactValue}
 						onChange={e => handleChange('contactValue', e.target.value)}
+						onKeyDown={handleContactValueKeyDown}
 						maxLength={CONTACT_FIELD_LIMITS.contactValue}
-						className={inputClass}
+						rows={1}
+						className={autoResizeTextareaClass}
 					/>
 					{errors.contactValue && (
 						<p className={errorClass}>{errors.contactValue}</p>
@@ -380,11 +410,12 @@ const [errors, setErrors] = useState<
 					</span>
 				</div>
 				<textarea
+					ref={messageRef}
 					value={values.message}
 					onChange={e => handleChange('message', e.target.value)}
 					rows={4}
 					maxLength={CONTACT_FIELD_LIMITS.message}
-					className={inputClass}
+					className={autoResizeTextareaClass}
 				/>
 			</div>
 

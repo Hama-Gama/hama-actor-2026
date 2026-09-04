@@ -1,10 +1,9 @@
 // app/api/contact/route.ts
 //
-// Принимает данные формы из ContactForm.tsx и должен отправить их на
-// CONTACT_EMAIL. Почта берётся из переменной окружения (см.
-// .env.local.example) — так её можно сменить на хостинге без правки кода
-// и без коммита. Сама отправка пока не подключена — ниже TODO с тремя
-// вариантами на выбор.
+// Принимает данные формы из ContactForm.tsx и отправляет их на CONTACT_EMAIL
+// через Resend. Почта и API-ключ берутся из переменных окружения (см.
+// .env.local.example) — так их можно сменить на хостинге без правки кода
+// и без коммита.
 //
 // Защита от ботов/спама — без визуальной капчи, три слоя:
 //   1. honeypot (`company`) — уже проверяется общей zod-схемой (max 0 симв.)
@@ -13,7 +12,11 @@
 //   3. rate limit по IP — не даёт спамить форму даже "терпеливому" боту
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getContactSchema } from '@/lib/validations/contact'
+import { Resend } from 'resend'
+import {
+	getContactSchema,
+	type ContactFormValues,
+} from '@/lib/validations/contact'
 
 const MIN_SUBMIT_TIME_MS = 2500 // быстрее 2.5с на всю форму — подозрительно
 const MAX_SUBMIT_TIME_MS = 1000 * 60 * 60 * 2 // старше 2ч — протухший таймстемп
@@ -21,12 +24,9 @@ const MAX_SUBMIT_TIME_MS = 1000 * 60 * 60 * 2 // старше 2ч — проту
 const RATE_LIMIT_WINDOW_MS = 60 * 1000 // окно в 1 минуту
 const RATE_LIMIT_MAX_REQUESTS = 3 // не больше 3 заявок с одного IP в минуту
 
-// In-memory карта — достаточно для одного долгоживущего процесса (VPS,
-// self-hosted Node). На serverless-хостинге (Vercel и т.п.) у каждого
-// "холодного" инстанса функции своя карта, так что лимит на практике
-// размывается между инстансами. Если это критично при масштабировании —
-// вынести счётчик в Redis (например @upstash/ratelimit, есть бесплатный
-// тариф на upstash.com).
+// In-memory карта — трафик небольшой, договорились оставить как есть (см.
+// обсуждение про Vercel/Upstash/Arcjet). Если со временем в логах увидите
+// подозрительный паттерн — вернуться к этому вопросу.
 const submissionsByIp = new Map<string, number[]>()
 
 function isRateLimited(ip: string): boolean {
@@ -45,8 +45,6 @@ function isRateLimited(ip: string): boolean {
 	return false
 }
 
-// Периодическая чистка карты, чтобы не текла память на долгоживущем
-// процессе. На serverless не критично — инстанс и так пересоздаётся.
 setInterval(
 	() => {
 		const now = Date.now()
@@ -60,8 +58,6 @@ setInterval(
 ).unref?.()
 
 function getClientIp(req: NextRequest): string {
-	// Прокси/CDN (в т.ч. Vercel) кладут реальный IP в x-forwarded-for —
-	// это список "client, proxy1, proxy2", берём первый элемент.
 	const forwardedFor = req.headers.get('x-forwarded-for')
 	if (forwardedFor) return forwardedFor.split(',')[0].trim()
 
@@ -71,13 +67,61 @@ function getClientIp(req: NextRequest): string {
 	return 'unknown'
 }
 
+// Человекочитаемая подпись способа связи — для тела письма.
+const CONTACT_METHOD_LABELS: Record<
+	ContactFormValues['preferredContact'],
+	string
+> = {
+	telegram: 'Telegram',
+	whatsapp: 'WhatsApp',
+	wechat: 'WeChat',
+	kakaotalk: 'KakaoTalk',
+	phone: 'Phone Call',
+	email: 'Email',
+	other: 'Other',
+}
+
+
+// Дата и время отправки — фиксированный часовой пояс Asia/Almaty, чтобы не
+// зависеть от того, где физически стоит сервер Vercel (обычно US, время
+// сервера сбило бы с толку в письме).
+function formatSubmittedAt(): string {
+	return new Intl.DateTimeFormat('ru-RU', {
+		timeZone: 'Asia/Almaty',
+		dateStyle: 'medium',
+		timeStyle: 'short',
+	}).format(new Date())
+}
+
+function buildEmailText(data: ContactFormValues): string {
+	const methodLabel =
+		data.preferredContact === 'other' && data.otherMethodLabel
+			? data.otherMethodLabel
+			: CONTACT_METHOD_LABELS[data.preferredContact]
+
+	const lines = [
+		`Name / Studio: ${data.name}`,
+		`Project & Role: ${data.projectRole}`,
+		data.deadline ? `Deadline: ${data.deadline}` : null,
+		`Preferred contact: ${methodLabel}`,
+		`Contact value: ${data.contactValue}`,
+		`Submitted at: ${formatSubmittedAt()} (Asia/Almaty)`,
+		data.message ? `\nMessage:\n${data.message}` : null,
+	]
+
+	return lines.filter(Boolean).join('\n')
+}
+
 export async function POST(req: NextRequest) {
 	const CONTACT_EMAIL = process.env.CONTACT_EMAIL
+	const RESEND_API_KEY = process.env.RESEND_API_KEY
 
-	if (!CONTACT_EMAIL) {
-		// Если забыли завести .env.local (локально) или переменную на
+	if (!CONTACT_EMAIL || !RESEND_API_KEY) {
+		// Если забыли завести .env.local (локально) или переменные на
 		// хостинге — явная ошибка в логах вместо тихой отправки в никуда.
-		console.error('CONTACT_EMAIL is not set — see .env.local.example')
+		console.error(
+			'CONTACT_EMAIL or RESEND_API_KEY is not set — see .env.local.example',
+		)
 		return NextResponse.json(
 			{ ok: false, error: 'Server misconfigured' },
 			{ status: 500 },
@@ -86,9 +130,6 @@ export async function POST(req: NextRequest) {
 
 	const ip = getClientIp(req)
 	if (isRateLimited(ip)) {
-		// 429 тут не страшно "спалить" боту — сам факт частых запросов
-		// и так его выдаёт, а честный человек в такой лимит почти никогда
-		// не упрётся.
 		return NextResponse.json(
 			{ ok: false, error: 'Too many requests, try again later' },
 			{ status: 429 },
@@ -137,8 +178,6 @@ export async function POST(req: NextRequest) {
 	}
 
 	// --- Timing-check ---------------------------------------------------
-	// Боту не нужно ждать — он шлёт POST сразу после GET. Живой человек
-	// физически не заполнит форму быстрее MIN_SUBMIT_TIME_MS.
 	const elapsed =
 		typeof formLoadedAt === 'number' ? Date.now() - formLoadedAt : null
 	const timingLooksLikeBot =
@@ -156,40 +195,38 @@ export async function POST(req: NextRequest) {
 
 	const data = result.data
 
-	// TODO: подключить реальную отправку письма на CONTACT_EMAIL.
-	// Варианты (любой из них подставляется прямо сюда):
-	//
-	// 1) Resend (https://resend.com) — самый простой способ на Vercel:
-	//    import { Resend } from 'resend'
-	//    const resend = new Resend(process.env.RESEND_API_KEY)
-	//    await resend.emails.send({
-	//      from: 'Site <onboarding@resend.dev>',
-	//      to: CONTACT_EMAIL,
-	//      subject: `Новая заявка от ${data.name}`,
-	//      text: JSON.stringify(data, null, 2),
-	//    })
-	//
-	// 2) Nodemailer через SMTP (Gmail/Mail.ru — нужен пароль приложения):
-	//    import nodemailer from 'nodemailer'
-	//    const transporter = nodemailer.createTransport({
-	//      host: 'smtp.mail.ru', port: 465, secure: true,
-	//      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-	//    })
-	//    await transporter.sendMail({
-	//      from: process.env.SMTP_USER,
-	//      to: CONTACT_EMAIL,
-	//      subject: `Новая заявка от ${data.name}`,
-	//      text: JSON.stringify(data, null, 2),
-	//    })
-	//
-	// 3) Любой другой провайдер (SendGrid, Postmark, Telegram-бот и т.д.) —
-	//    принцип тот же: CONTACT_EMAIL уже импортирован и готов к использованию.
+	// --- Отправка письма через Resend ---------------------------------------
+	// onboarding@resend.dev — тестовый адрес Resend, работает без своего
+	// домена, но может слать ТОЛЬКО на email, которым зарегистрирован
+	// аккаунт Resend (то есть должен совпадать с CONTACT_EMAIL). Если позже
+	// заведёте свой домен и верифицируете его в Resend — поменяйте `from`
+	// на адрес с этого домена, тогда сможете слать куда угодно.
+	const resend = new Resend(RESEND_API_KEY)
 
-	console.log('Contact form submission (email sending not wired up yet):', {
-		to: CONTACT_EMAIL,
-		data,
-		ip,
-	})
+	try {
+		const { error } = await resend.emails.send({
+			from: 'Hama Actor Site <onboarding@resend.dev>',
+			to: CONTACT_EMAIL,
+			replyTo:
+				data.preferredContact === 'email' ? data.contactValue : undefined,
+			subject: `Новая заявка с сайта от ${data.name}`,
+			text: buildEmailText(data),
+		})
+
+		if (error) {
+			console.error('Resend error:', error)
+			return NextResponse.json(
+				{ ok: false, error: 'Email sending failed' },
+				{ status: 502 },
+			)
+		}
+	} catch (err) {
+		console.error('Unexpected error sending email:', err)
+		return NextResponse.json(
+			{ ok: false, error: 'Email sending failed' },
+			{ status: 502 },
+		)
+	}
 
 	return NextResponse.json({ ok: true })
 }

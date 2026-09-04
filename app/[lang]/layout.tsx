@@ -1,4 +1,12 @@
-import { Cormorant_Garamond, DM_Mono } from 'next/font/google'
+import {
+	Cormorant_Garamond,
+	DM_Mono,
+	JetBrains_Mono,
+	Noto_Serif_KR,
+} from 'next/font/google'
+import localFont from 'next/font/local'
+
+
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { LangProvider } from '@/lib/i18n-context'
@@ -22,6 +30,58 @@ const monoFont = DM_Mono({
 	variable: '--font-mono',
 	display: 'swap',
 })
+
+// Кириллица (ru/kk) — DM Mono официально не поддерживает cyrillic (только
+// latin), поэтому для этих локалей используем другой моно-шрифт с тем же
+// характером и той же CSS-переменной --font-mono. На <html> подключается
+// только ОДИН из mono-шрифтов (см. monoFontByLocale ниже) — они не
+// конфликтуют, потому что каждый рендерится на отдельной локали/странице.
+const monoFontCyrillic = JetBrains_Mono({
+	subsets: ['latin', 'cyrillic'],
+	weight: ['400', '500'],
+	variable: '--font-mono',
+	display: 'swap',
+})
+
+// Pretendard — де-факто стандарт для корейских сайтов (Toss, Naver и
+// большинство корейских продуктов используют именно его): спроектирован
+// как замена системному шрифту, метрика подогнана под Apple SD Gothic
+// Neo/Malgun Gothic, поэтому корейский текст выглядит "родным". В Google
+// Fonts его нет — используем next/font/local с файлом из пакета
+// pretendard (см. app/fonts/PretendardVariable.woff2).
+const monoFontKorean = localFont({
+	src: '../fonts/PretendardVariable.woff2',
+	weight: '45 920', // вариативный шрифт, диапазон осей веса
+	variable: '--font-mono',
+	display: 'swap',
+})
+// Cormorant Garamond не поддерживает корейский вообще — для заголовков
+// (font-display) на корейской версии нужна отдельная засечка с хангылем.
+// См. комментарий выше про subsets/preload для CJK.
+const displayFontKorean = Noto_Serif_KR({
+	weight: ['400', '500', '600', '700'],
+	variable: '--font-display',
+	preload: false,
+	display: 'swap',
+})
+
+// По локали выбираем, какой именно шрифт займёт CSS-переменные
+// --font-mono / --font-display. Компоненты (ContactForm.tsx и т.д.)
+// ничего не знают об этом переключении — они как использовали
+// className='font-mono'/'font-display', так и используют.
+const monoFontByLocale: Record<Locale, { variable: string }> = {
+	en: monoFont,
+	ru: monoFontCyrillic,
+	kk: monoFontCyrillic,
+	ko: monoFontKorean,
+}
+
+const displayFontByLocale: Record<Locale, { variable: string }> = {
+	en: displayFont,
+	ru: displayFont,
+	kk: displayFont,
+	ko: displayFontKorean,
+}
 
 // Домен вынесен в константу — используется и в hreflang, и в OG/canonical
 // ниже. Меняешь один раз здесь (или через .env), а не по всему файлу.
@@ -148,7 +208,7 @@ export default async function LocaleLayout({
 	return (
 		<html
 			lang={lang}
-			className={`${displayFont.variable} ${monoFont.variable} scroll-smooth`}
+			className={`${displayFontByLocale[lang].variable} ${monoFontByLocale[lang].variable} scroll-smooth`}
 			suppressHydrationWarning
 		>
 			<head>
