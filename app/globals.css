@@ -29,3 +29,7 @@
     @apply bg-[var(--color-bg)] text-[var(--color-fg)] antialiased;
   }
 }
+
+html[lang='ko'] {
+	--font-mono: 'Pretendard Variable', 'Malgun Gothic', system-ui, sans-serif;
+}

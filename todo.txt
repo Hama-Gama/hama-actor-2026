@@ -1,3 +1,6 @@
+
+
+
 npm run lint error
 
 contacts form input updates (obyaz ne obyaz, zashita ot robotov & spama)
@@ -39,6 +42,8 @@ SHARING / SHARE UX
 на будущее:
 эмейл подписка на новости
 Бэкстейдж.
+
+check on mac pptx
 
 
 Как это устроено на стороне твоего сайта? (2 продвинутых сценария)

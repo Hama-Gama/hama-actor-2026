@@ -4,9 +4,7 @@ import {
 	JetBrains_Mono,
 	Noto_Serif_KR,
 } from 'next/font/google'
-import localFont from 'next/font/local'
-
-
+// и убрать localFont/monoFontKorean
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { LangProvider } from '@/lib/i18n-context'
@@ -36,12 +34,16 @@ const monoFont = DM_Mono({
 // характером и той же CSS-переменной --font-mono. На <html> подключается
 // только ОДИН из mono-шрифтов (см. monoFontByLocale ниже) — они не
 // конфликтуют, потому что каждый рендерится на отдельной локали/странице.
+
+
 const monoFontCyrillic = JetBrains_Mono({
 	subsets: ['latin', 'cyrillic'],
 	weight: ['400', '500'],
 	variable: '--font-mono',
 	display: 'swap',
+	preload: false, // нужен только ru/kk
 })
+
 
 // Pretendard — де-факто стандарт для корейских сайтов (Toss, Naver и
 // большинство корейских продуктов используют именно его): спроектирован
@@ -49,12 +51,6 @@ const monoFontCyrillic = JetBrains_Mono({
 // Neo/Malgun Gothic, поэтому корейский текст выглядит "родным". В Google
 // Fonts его нет — используем next/font/local с файлом из пакета
 // pretendard (см. app/fonts/PretendardVariable.woff2).
-const monoFontKorean = localFont({
-	src: '../fonts/PretendardVariable.woff2',
-	weight: '45 920', // вариативный шрифт, диапазон осей веса
-	variable: '--font-mono',
-	display: 'swap',
-})
 // Cormorant Garamond не поддерживает корейский вообще — для заголовков
 // (font-display) на корейской версии нужна отдельная засечка с хангылем.
 // См. комментарий выше про subsets/preload для CJK.
@@ -69,11 +65,12 @@ const displayFontKorean = Noto_Serif_KR({
 // --font-mono / --font-display. Компоненты (ContactForm.tsx и т.д.)
 // ничего не знают об этом переключении — они как использовали
 // className='font-mono'/'font-display', так и используют.
+
 const monoFontByLocale: Record<Locale, { variable: string }> = {
 	en: monoFont,
 	ru: monoFontCyrillic,
 	kk: monoFontCyrillic,
-	ko: monoFontKorean,
+	ko: { variable: '' }, // шрифт для ko задаётся в globals.css через Pretendard
 }
 
 const displayFontByLocale: Record<Locale, { variable: string }> = {
@@ -112,7 +109,7 @@ const content: Record<Locale, { title: string; description: string }> = {
 			'Хамит Аркаевтың ресми портфолиосы — актёр және жекпе-жек шебері',
 	},
 	ko: {
-		title: '하밋 아르카예프 | 배우',
+		title: '하미트 아르카예프 | 배우',
 		description: '배우이자 무술가 하밋 아르카예프의 공식 포트폴리오',
 	},
 }
@@ -212,6 +209,12 @@ export default async function LocaleLayout({
 			suppressHydrationWarning
 		>
 			<head>
+				{lang === 'ko' && (
+					<link
+						rel='stylesheet'
+						href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css'
+					/>
+				)}
 				{/* Favicon — Н (Hama) жирным гротеском на чёрном + красная полоса #d90416,
 				отдельно от Cormorant Garamond заголовков: засечки нечитаемы на 16px */}
 				<link rel='icon' href='/favicon-32x32.png' sizes='32x32' />

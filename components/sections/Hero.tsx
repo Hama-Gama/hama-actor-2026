@@ -1,5 +1,3 @@
-'use client'
-
 import Image from 'next/image'
 import { MapPin, Clock } from 'lucide-react'
 import { ProfileDownload } from '../ui/ProfileDownload'
@@ -97,11 +95,12 @@ export default function Hero({ lang }: HeroProps) {
 				{/* Photo Side: Полноширинный блок на мобилке (w-full, rounded-none), скругление и max-width возвращаются со sm */}
 				<div className='flex-1 relative w-full sm:max-w-sm md:max-w-md lg:max-w-md xl:max-w-lg 2xl:max-w-xl rounded-none sm:rounded-lg overflow-hidden shadow-lg shadow-black/10 transition-transform duration-500 hover:scale-[1.01]'>
 					<Image
-						src='/hero2.jpg'
+						src='/hero3.jpg'
 						alt={content.name}
 						width={800}
 						height={1000}
 						priority
+						fetchPriority='high'
 						sizes='(max-width: 1024px) 100vw, 50vw'
 						className='w-full h-auto block'
 					/>
