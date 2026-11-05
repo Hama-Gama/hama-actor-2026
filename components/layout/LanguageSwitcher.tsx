@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { Globe, ChevronDown } from 'lucide-react'
+import { LOCALE_COOKIE_NAME, LOCALE_COOKIE_MAX_AGE } from '@/lib/locales'
 
 export const LOCALES = [
 	{ id: 'en', code: 'gb', label: 'EN', name: 'English' },
@@ -34,15 +34,19 @@ export default function LanguageSwitcher({
 	const activeLocale = LOCALES.find(l => l.id === currentLang) ?? LOCALES[0]
 	const otherLocales = LOCALES.filter(l => l.id !== currentLang)
 
-	// Строим href с учётом того, что proxy.ts трактует "/en" как непрямой
-	// путь (redirect -> "/" -> rewrite на "/en"): для дефолтного языка сразу
-	// ведём на "/", чтобы не делать лишний сетевой hop.
-	// Хэш текущей страницы (например "#contact") сохраняем, чтобы после
-	// смены языка пользователя не выкидывало со скролл-позиции.
-	const buildHref = (id: string) => {
-		const base = id === 'en' ? '/' : `/${id}`
-		const hash = typeof window !== 'undefined' ? window.location.hash : ''
-		return `${base}${hash}`
+	// href нужен для доступности, средней кнопки мыши и "копировать ссылку".
+	// Реальный переход делает handleSelect.
+	const pathFor = (id: string) => (id === 'en' ? '/' : `/${id}`)
+
+	const handleSelect = (e: React.MouseEvent, id: string) => {
+		// Ctrl/Cmd/средняя кнопка — пусть браузер откроет новую вкладку сам
+		if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+
+		e.preventDefault()
+		document.cookie = `${LOCALE_COOKIE_NAME}=${id}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`
+		setLangOpen(false)
+		// Хэш (#contact) сохраняем, чтобы не терять позицию
+		window.location.assign(`${pathFor(id)}${window.location.hash}`)
 	}
 
 	return (
@@ -75,12 +79,11 @@ export default function LanguageSwitcher({
 					className='absolute right-0 top-full mt-3 w-44 sm:w-48 2xl:w-56 bg-white border border-neutral-100 rounded-sm shadow-lg overflow-hidden z-50'
 				>
 					{otherLocales.map(l => (
-						<Link
+						<a
 							key={l.id}
-							href={buildHref(l.id)}
+							href={pathFor(l.id)}
 							role='menuitem'
-							scroll={false}
-							onClick={() => setLangOpen(false)}
+							onClick={e => handleSelect(e, l.id)}
 							className='flex items-center gap-3 px-4 py-3 hover:bg-neutral-50 transition-colors'
 						>
 							<span className='w-5 h-5 rounded-full overflow-hidden shrink-0 border border-neutral-200'>
@@ -92,7 +95,7 @@ export default function LanguageSwitcher({
 								/>
 							</span>
 							<span className='font-sans text-sm'>{l.name}</span>
-						</Link>
+						</a>
 					))}
 				</div>
 			)}

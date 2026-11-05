@@ -19,9 +19,11 @@ export function proxy(req: NextRequest) {
 		return NextResponse.next()
 	}
 
-	// 2. Корень "/" — определяем язык: cookie (осознанный выбор) > Accept-Language
-	//    (эвристика для новых посетителей, с учётом q-весов) > DEFAULT_LOCALE.
-	//    Referer больше не используется — он ненадёжен (см. аудит).
+	// 2. Корень "/" — определяем язык: cookie (осознанный выбор пользователя) >
+	//    Accept-Language (эвристика, с учётом q-весов) > DEFAULT_LOCALE.
+	//    Cookie здесь НЕ пишем: автоопределённый язык это догадка, а не выбор.
+	//    Cookie ставится только при явном действии: клик в LanguageSwitcher
+	//    или заход на /en, /ru, /kk, /ko (шаги 3 и 4 ниже).
 	if (pathname === '/') {
 		const cookieValue = req.cookies.get(LOCALE_COOKIE_NAME)?.value
 		const acceptLanguageHeader = req.headers.get('accept-language')
@@ -29,17 +31,6 @@ export function proxy(req: NextRequest) {
 		const locale = detectLocale({ cookieValue, acceptLanguageHeader })
 
 		const res = NextResponse.rewrite(new URL(`/${locale}`, req.url))
-
-		// Явно фиксируем выбор в cookie — даже если он совпал с DEFAULT_LOCALE
-		// "по умолчанию", а не осознанным кликом. Это ок: при следующем визите
-		// снова будет либо cookie, либо свежий Accept-Language — поведение
-		// не ухудшается, а для реальных ручных переключений (см. ниже) cookie
-		// уже гарантированно отражает точный выбор.
-		res.cookies.set(LOCALE_COOKIE_NAME, locale, {
-			maxAge: LOCALE_COOKIE_MAX_AGE,
-			path: '/',
-			sameSite: 'lax',
-		})
 
 		// Кэш (CDN/браузер) не должен путать разных пользователей на одном "/"
 		res.headers.set('Vary', 'Accept-Language, Cookie')
